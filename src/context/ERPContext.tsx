@@ -63,7 +63,7 @@ interface ERPContextType {
   currentUser: UserProfile;
   signIn: (
     userId: string,
-    studentDetails?: { email: string; name: string; mobile: string; wroNo: string; batchCode: string }
+    studentDetails?: { email: string; name: string; mobile: string; wroNo: string }
   ) => void;
   signOut: () => void;
   switchUser: (userId: string) => void;
@@ -406,7 +406,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const signIn = (
     userId: string,
-    studentDetails?: { email: string; name: string; mobile: string; wroNo: string; batchCode: string }
+    studentDetails?: { email: string; name: string; mobile: string; wroNo: string }
   ) => {
     const base = DEMO_USERS.find((u) => u.id === userId) ?? DEMO_USERS[0];
     let userProfile: UserProfile = { ...base };
@@ -427,7 +427,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         email: cleanEmail,
         mobile: studentDetails.mobile.trim(),
         wroNo: studentDetails.wroNo.trim().toUpperCase(),
-        batchCode: studentDetails.batchCode.trim().toUpperCase(),
         initials,
       };
 
@@ -443,8 +442,6 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             email: userProfile.email,
             mobile: userProfile.mobile,
             wroNo: userProfile.wroNo,
-            batchCode: userProfile.batchCode,
-            role: userProfile.role,
           }),
         }).catch(() => {
           // Non-blocking: do not prevent student from entering the lab
