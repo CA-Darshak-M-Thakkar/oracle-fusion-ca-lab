@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #161513;
+    background-color: #F4F6F9;
+  }
+}
+
+/* Oracle Fusion Sky & Redwood subtle scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f4f7;
+}
+::-webkit-scrollbar-thumb {
+  background: #b8c4ce;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8b9aa6;
+}
+
+.oracle-sky-gradient {
+  background: linear-gradient(180deg, #56A3D5 0%, #83BFE5 55%, #A7D3EE 100%);
+}
+
+.oracle-header-gradient {
+  background: linear-gradient(90deg, #4B96C8 0%, #5BA7D8 100%);
+}
+
+.oracle-input {
+  @apply border border-[#BCC6D0] rounded-[3px] px-2.5 py-1 text-[13px] bg-white text-[#161513] focus:outline-none focus:border-[#00688C] focus:ring-1 focus:ring-[#00688C] transition-colors;
+}
+
+.oracle-select {
+  @apply border border-[#BCC6D0] rounded-[3px] px-2 py-1 text-[13px] bg-white text-[#161513] focus:outline-none focus:border-[#00688C] focus:ring-1 focus:ring-[#00688C];
+}
+
+.oracle-btn-primary {
+  @apply bg-[#00688C] hover:bg-[#00526F] text-white font-medium text-[12px] px-3.5 py-1.5 rounded-[3px] shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5;
+}
+
+.oracle-btn-secondary {
+  @apply bg-white hover:bg-[#F0F4F7] text-[#161513] border border-[#BCC6D0] font-medium text-[12px] px-3 py-1.5 rounded-[3px] shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5;
+}
+
+.oracle-panel {
+  @apply bg-white border border-[#D6DFE6] rounded-[4px] shadow-sm;
+}
+
+.oracle-table-header {
+  @apply bg-[#EFF3F7] text-[#312D2A] text-[12px] font-semibold border-b border-[#D6DFE6] select-none;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

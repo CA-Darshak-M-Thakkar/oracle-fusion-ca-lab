@@ -1,0 +1,4 @@
+Order_Scenario,Customer_Name,Customer_Credit_Limit_INR,Item_Code,Quantity,Unit_Price_INR,Total_INR,Expected_System_Behavior
+Standard_Order,NASA PVT LTD,50000,LAPTOP-PRO,5,1250,6250,Approved -> Awaiting Shipping
+Credit_Hold_Test,Imaging Innovations Inc.,25000,ELEC-PANEL,40,850,34000,Placed On Hold (Exceeds Credit Limit)
+Bulk_Order,A T & T SOLUTIONS INC,250000,NYLON THREAD,100,120,12000,Approved -> Pick Wave -> Ship Confirm

@@ -1,0 +1,7 @@
+Audit_Area,Oracle_Screen_Path,Red_Flag_To_Check,Case_Study_Reference,Status_By_Student
+P2P_Unauthorized_Vendor,Payables > Invoices / CA Audit Lab,Payment to Shadow Logistics (Unverified) without PO/GRN,Red Flag Monitor,Pending
+P2P_3Way_Match_Variance,Payables > Invoices,Invoice APEX-889 billed 50 EKG vs 35 EKG received on GRN 101,Case Study 9.1 (ABC Ltd.),Pending
+P2P_Inventory_Shrinkage,CA Audit Lab > Case Study 9.1,Adjustment ADJ-401 (-15 EKG) without manager documentation,Case Study 9.1 (ABC Ltd.),Pending
+O2C_Credit_Limit_Breach,Order Management > Overview,SO-1002 placed On Hold for exceeding ₹25000 credit limit,Case Study 9.2 (ABC Electronics),Pending
+O2C_Aged_Receivables,Scheduled Processes > Aging - 4 Bucket Report,Overdue invoices > 30 days (Inv 9901 & Inv 9902),Case Study 9.2 (ABC Electronics),Pending
+Companies_Act_2013_Audit_Trail,Tools > Audit Reports,Verify Insert/Update/Delete logs with Old vs New values,Section 8 Fusion Audit,Pending
