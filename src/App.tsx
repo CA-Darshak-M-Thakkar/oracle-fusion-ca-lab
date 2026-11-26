@@ -15,6 +15,7 @@ import { ReceivablesModule } from './components/o2c/ReceivablesModule';
 import { GeneralAccountingModule } from './components/gl/GeneralAccountingModule';
 import { ScheduledProcessesModule } from './components/reports/ScheduledProcessesModule';
 import { AuditModule } from './components/audit/AuditModule';
+import { EBSClassicApp } from './components/ebs/EBSClassicApp';
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 
 const ToastContainer: React.FC = () => {
@@ -47,11 +48,21 @@ const ToastContainer: React.FC = () => {
 const MainRouter: React.FC = () => {
   const { isSignedIn, currentRoute } = useERP();
   const [navOpen, setNavOpen] = useState(false);
+  const [uiMode, setUiMode] = useState<'fusion' | 'ebs'>('fusion');
 
   if (!isSignedIn) {
     return (
       <>
         <LoginScreen />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  if (uiMode === 'ebs') {
+    return (
+      <>
+        <EBSClassicApp onSwitchToFusion={() => setUiMode('fusion')} />
         <ToastContainer />
       </>
     );
@@ -108,7 +119,7 @@ const MainRouter: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <TopHeader onOpenNavigator={() => setNavOpen(true)} />
+      <TopHeader onOpenNavigator={() => setNavOpen(true)} onSwitchToEBS={() => setUiMode('ebs')} />
       <CATeachingBar />
       <NavigatorDrawer open={navOpen} onClose={() => setNavOpen(false)} />
       <main className="flex-1">{renderModule()}</main>

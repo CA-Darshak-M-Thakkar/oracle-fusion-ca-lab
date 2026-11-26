@@ -21,6 +21,7 @@ import { StudentLabPackModal } from './StudentLabPackModal';
 
 interface TopHeaderProps {
   onOpenNavigator: () => void;
+  onSwitchToEBS?: () => void;
 }
 
 const SEARCH_INDEX: { label: string; category: string; route: ModuleRoute }[] = [
@@ -43,7 +44,7 @@ const SEARCH_INDEX: { label: string; category: string; route: ModuleRoute }[] = 
   { label: 'CA Audit Lab & Red Flags (Case Studies 9.1 & 9.2)', category: 'Risk Management', route: 'ca_audit_lab' },
 ];
 
-export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator }) => {
+export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchToEBS }) => {
   const {
     currentUser,
     switchUser,
@@ -178,6 +179,15 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator }) => {
 
       {/* Right: Utility Icons */}
       <div className="flex items-center gap-1.5">
+        {onSwitchToEBS && (
+          <button
+            onClick={onSwitchToEBS}
+            title="Switch to Classic Oracle EBS R12 Forms UI (from P2P PDF)"
+            className="px-2.5 py-1 rounded text-[11.5px] font-medium flex items-center gap-1 bg-[#2D5F7E] border border-white/30 text-white hover:bg-[#1E445C] transition-colors mr-1"
+          >
+            <span>EBS R12 Classic UI</span>
+          </button>
+        )}
         <button
           onClick={() => setLabPackOpen(true)}
           title="Download Sample Files & Track Completed Lab Tasks"
