@@ -183,9 +183,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchT
           <button
             onClick={onSwitchToEBS}
             title="Switch to Classic Oracle EBS R12 Forms UI (from P2P PDF)"
-            className="px-2.5 py-1 rounded text-[11.5px] font-medium flex items-center gap-1 bg-[#2D5F7E] border border-white/30 text-white hover:bg-[#1E445C] transition-colors mr-1"
+            className="px-2.5 py-1 rounded text-[11.5px] font-medium flex items-center gap-1 bg-[#2D5F7E] border border-white/30 text-white hover:bg-[#1E445C] transition-colors mr-1 whitespace-nowrap shrink-0"
           >
-            <span>EBS R12 Classic UI</span>
+            <span className="hidden md:inline">EBS R12 Classic UI</span>
+            <span className="md:hidden">EBS UI</span>
           </button>
         )}
         <button
