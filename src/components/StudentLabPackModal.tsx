@@ -23,7 +23,7 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
   } = useERP();
 
   const [studentName, setStudentName] = useState(currentUser.name);
-  const [rollNumber, setRollNumber] = useState('ICAI-AICITSS-01');
+  const [rollNumber, setRollNumber] = useState(currentUser.wroNo ?? 'WRO0000000');
 
   if (!open) return null;
 
@@ -46,7 +46,9 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
     const rows = [
       ['Student Name', studentName],
       ['Student Email', currentUser.email ?? 'N/A'],
-      ['ICAI / Batch Roll No', rollNumber],
+      ['Mobile No', currentUser.mobile ?? 'N/A'],
+      ['WRO / ICAI Reg No', rollNumber],
+      ['Batch Code', currentUser.batchCode ?? 'AICITSS2026'],
       ['Completed Tasks', `${completedCount} / ${tasks.length}`],
       ['Timestamp', new Date().toISOString()],
       [],

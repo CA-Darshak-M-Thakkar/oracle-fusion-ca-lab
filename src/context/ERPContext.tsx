@@ -23,6 +23,7 @@ import {
   InventoryAdjustment,
   NotificationItem,
 } from '../types/erp';
+import { GOOGLE_SHEET_WEBHOOK_URL } from '../config/attendance';
 import {
   DEMO_USERS,
   INITIAL_SUPPLIERS,
@@ -60,7 +61,10 @@ interface ERPContextType {
   // Auth & Navigation
   isSignedIn: boolean;
   currentUser: UserProfile;
-  signIn: (userId: string, customEmail?: string, customName?: string) => void;
+  signIn: (
+    userId: string,
+    studentDetails?: { email: string; name: string; mobile: string; wroNo: string; batchCode: string }
+  ) => void;
   signOut: () => void;
   switchUser: (userId: string) => void;
 
@@ -400,31 +404,52 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSelectedId(id);
   }, []);
 
-  const signIn = (userId: string, customEmail?: string, customName?: string) => {
+  const signIn = (
+    userId: string,
+    studentDetails?: { email: string; name: string; mobile: string; wroNo: string; batchCode: string }
+  ) => {
     const base = DEMO_USERS.find((u) => u.id === userId) ?? DEMO_USERS[0];
-    const cleanEmail = customEmail?.trim().toLowerCase();
     let userProfile: UserProfile = { ...base };
 
-    if (cleanEmail && cleanEmail.includes('@')) {
-      const derivedName =
-        customName?.trim() ||
-        cleanEmail
-          .split('@')[0]
-          .replace(/[._-]+/g, ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase());
-      const parts = derivedName.split(/\s+/).filter(Boolean);
+    if (studentDetails) {
+      const cleanEmail = studentDetails.email.trim().toLowerCase();
+      const cleanName = studentDetails.name.trim();
+      const parts = cleanName.split(/\s+/).filter(Boolean);
       const initials =
         parts.length >= 2
           ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
-          : derivedName.slice(0, 2).toUpperCase();
+          : cleanName.slice(0, 2).toUpperCase();
 
       userProfile = {
         ...base,
         id: cleanEmail,
-        name: derivedName,
+        name: cleanName,
         email: cleanEmail,
+        mobile: studentDetails.mobile.trim(),
+        wroNo: studentDetails.wroNo.trim().toUpperCase(),
+        batchCode: studentDetails.batchCode.trim().toUpperCase(),
         initials,
       };
+
+      // Log attendance to Google Sheet if webhook URL is configured
+      if (GOOGLE_SHEET_WEBHOOK_URL) {
+        fetch(GOOGLE_SHEET_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            timestamp: new Date().toISOString(),
+            name: userProfile.name,
+            email: userProfile.email,
+            mobile: userProfile.mobile,
+            wroNo: userProfile.wroNo,
+            batchCode: userProfile.batchCode,
+            role: userProfile.role,
+          }),
+        }).catch(() => {
+          // Non-blocking: do not prevent student from entering the lab
+        });
+      }
     }
 
     setCurrentUser(userProfile);
@@ -433,7 +458,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast(
       'success',
       'Signed In',
-      `Welcome to Oracle Applications Cloud, ${userProfile.name}${userProfile.email ? ` (${userProfile.email})` : ''}`
+      `Welcome, ${userProfile.name}${userProfile.wroNo ? ` (${userProfile.wroNo})` : ''}`
     );
   };
 

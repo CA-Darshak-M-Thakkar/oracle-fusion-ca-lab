@@ -46,6 +46,9 @@ export interface UserProfile {
   id: string;
   name: string;
   email?: string;
+  mobile?: string;
+  wroNo?: string;
+  batchCode?: string;
   initials: string;
   role: string;
   department: string;
