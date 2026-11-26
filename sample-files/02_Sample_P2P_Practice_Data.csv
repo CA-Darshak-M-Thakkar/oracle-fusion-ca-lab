@@ -1,0 +1,5 @@
+Task_Type,Supplier_Name,Item_Description,Category,Quantity,UOM,Unit_Price_INR,Expected_Match_Result,CA_Audit_Note
+Requisition_1,MURALI TECHNOLOGIES,Annual ERP Audit Software,IT Hardware,1,01EACH,15000,Matched (3-Way),Standard approved vendor purchase
+Requisition_2,Advantage Corp,GST Compliance Advisory,Miscellaneous,2,01EACH,8500,Matched (3-Way),Service procurement with approval
+Requisition_3,Apex Industrial Supplies,Nylon Thread - Industrial Grade,Manufacturing,20,EKG,120,Qty Variance if GRN < 20,Test partial receipt to observe 3-Way Match hold
+Unmatched_Bill_Test,Shadow Logistics (Unverified),Urgent Freight Charges,Miscellaneous,1,01EACH,4500,Unmatched (No PO),Red Flag: Unauthorized supplier & missing PO

@@ -1,0 +1,56 @@
+ORACLE FUSION CLOUD ERP — CA (AICITSS UNIT 4) STUDENT LAB WORKBOOK
+=====================================================================
+All amounts in Indian Rupees (INR / ₹)
+
+PART A: PROCURE-TO-PAY (P2P) CYCLE
+----------------------------------
+Task 1: Create & Submit Purchase Requisition
+  - Go to: Procurement > Purchase Requisitions > More Tasks > Request Noncatalog Item
+  - Enter: Item = "Annual ERP Audit Software", Qty = 1, Price = ₹15,000, Supplier = MURALI TECHNOLOGIES
+  - Click "Add to Cart" -> Review Cart -> Submit.
+  - Verify status becomes "Approved".
+
+Task 2: Convert Requisition to Purchase Order (PO)
+  - Go to: Procurement > Process Requisitions
+  - Select your Approved Requisition -> Click "Add to Document Builder" -> OK -> Create.
+  - On Edit PO screen, verify Supplier & Payment Terms -> Click "Submit".
+  - Verify PO status changes from "Incomplete" to "Open".
+
+Task 3: Receive Goods (GRN)
+  - Go to: Procurement > My Receipts
+  - Select your Open PO -> Click "Receive" -> Enter Quantity & Packing Slip -> Submit.
+  - Note the generated GRN (Receipt Number).
+
+Task 4: Create AP Invoice & 3-Way Match
+  - Go to: Payables > Invoices > Create Invoice
+  - Select your PO in "Identifying PO (for 3-Way Match)" -> Save & Run 3-Way Match.
+  - Verify Match Status = "Matched (3-Way)" -> Click "Post to Ledger".
+
+Task 5: Pay Supplier
+  - Go to: Payables > Payments > Create Payment
+  - Select Supplier -> Click "Select and Add Invoices" -> Check your Invoice -> Apply & OK -> Save and Close.
+
+PART B: ORDER-TO-CASH (O2C) CYCLE
+---------------------------------
+Task 6: Create Sales Order
+  - Go to: Order Management > Create Order
+  - Select Customer = NASA PVT LTD, Item = LAPTOP-PRO, Qty = 5 -> Submit.
+  - Note: Try a second order for Imaging Innovations, Inc. (Qty = 50) to observe Credit Limit Hold!
+
+Task 7: Pick Wave & Ship Confirm
+  - Go to: Supply Chain Execution > Pick Waves -> Release Pick Wave & Confirm Pick.
+  - On Edit Shipment -> Click "Ship Confirm" -> View Packing Slip -> Click "Verify AR Invoice in Receivables".
+
+Task 8: Review AR Invoice & Collect Receipt
+  - Go to: Receivables > Billing -> Open your new Invoice -> Actions > View Balance Details.
+  - Go to: Receivables > Accounts Receivable -> Create Receipt -> Apply to your Invoice -> Submit.
+
+PART C: GENERAL ACCOUNTING, REPORTS & FUSION AUDIT
+--------------------------------------------------
+Task 9: Inquire Detail Balances & Trial Balance
+  - Go to: General Accounting > Detail Balances -> Check updated Cash (0001), AR (1210), AP (2001).
+  - Go to: Tools > Scheduled Processes -> Schedule New Process -> Run "Trial Balance Report" & "Aging - 4 Bucket Report".
+
+Task 10: Fusion Audit & Case Studies
+  - Go to: Tools > Audit Reports -> Filter by your User & Export to Excel (CSV).
+  - Go to: Risk Management > CA Audit Lab -> Inspect Live Red Flags, Case Study 9.1 (ABC Ltd.), and Case Study 9.2 (ABC Electronics).
