@@ -60,7 +60,7 @@ interface ERPContextType {
   // Auth & Navigation
   isSignedIn: boolean;
   currentUser: UserProfile;
-  signIn: (userId: string) => void;
+  signIn: (userId: string, customEmail?: string, customName?: string) => void;
   signOut: () => void;
   switchUser: (userId: string) => void;
 
@@ -400,12 +400,41 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSelectedId(id);
   }, []);
 
-  const signIn = (userId: string) => {
-    const found = DEMO_USERS.find((u) => u.id === userId) ?? DEMO_USERS[0];
-    setCurrentUser(found);
+  const signIn = (userId: string, customEmail?: string, customName?: string) => {
+    const base = DEMO_USERS.find((u) => u.id === userId) ?? DEMO_USERS[0];
+    const cleanEmail = customEmail?.trim().toLowerCase();
+    let userProfile: UserProfile = { ...base };
+
+    if (cleanEmail && cleanEmail.includes('@')) {
+      const derivedName =
+        customName?.trim() ||
+        cleanEmail
+          .split('@')[0]
+          .replace(/[._-]+/g, ' ')
+          .replace(/\b\w/g, (c) => c.toUpperCase());
+      const parts = derivedName.split(/\s+/).filter(Boolean);
+      const initials =
+        parts.length >= 2
+          ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+          : derivedName.slice(0, 2).toUpperCase();
+
+      userProfile = {
+        ...base,
+        id: cleanEmail,
+        name: derivedName,
+        email: cleanEmail,
+        initials,
+      };
+    }
+
+    setCurrentUser(userProfile);
     setIsSignedIn(true);
     setCurrentRoute('home');
-    showToast('success', 'Signed In', `Welcome to Oracle Applications Cloud, ${found.name}`);
+    showToast(
+      'success',
+      'Signed In',
+      `Welcome to Oracle Applications Cloud, ${userProfile.name}${userProfile.email ? ` (${userProfile.email})` : ''}`
+    );
   };
 
   const signOut = () => {

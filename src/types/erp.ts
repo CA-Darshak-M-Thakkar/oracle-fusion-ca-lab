@@ -45,6 +45,7 @@ export type SpringboardTab =
 export interface UserProfile {
   id: string;
   name: string;
+  email?: string;
   initials: string;
   role: string;
   department: string;

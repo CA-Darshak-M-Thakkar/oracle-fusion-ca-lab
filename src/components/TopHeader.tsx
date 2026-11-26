@@ -359,7 +359,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchT
             <div className="absolute right-0 top-9 w-72 bg-white text-[#161513] border border-[#D6DFE6] rounded shadow-xl z-50 overflow-hidden">
               <div className="px-4 py-3 bg-[#F4F6F9] border-b border-[#D6DFE6]">
                 <div className="text-[13px] font-semibold">{currentUser.name}</div>
-                <div className="text-[11.5px] text-[#00688C] font-medium">{currentUser.role}</div>
+                {currentUser.email && <div className="text-[11px] text-[#524C46] truncate">{currentUser.email}</div>}
+                <div className="text-[11.5px] text-[#00688C] font-medium mt-0.5">{currentUser.role}</div>
                 <div className="text-[11px] text-[#5E5852]">{currentUser.department}</div>
               </div>
 

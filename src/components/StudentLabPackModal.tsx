@@ -45,6 +45,7 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
   const downloadSubmissionProof = () => {
     const rows = [
       ['Student Name', studentName],
+      ['Student Email', currentUser.email ?? 'N/A'],
       ['ICAI / Batch Roll No', rollNumber],
       ['Completed Tasks', `${completedCount} / ${tasks.length}`],
       ['Timestamp', new Date().toISOString()],

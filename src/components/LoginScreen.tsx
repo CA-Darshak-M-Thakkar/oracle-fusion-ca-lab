@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
 import { useERP } from '../context/ERPContext';
 import { DEMO_USERS } from '../data/seedData';
-import { Lock, User, GraduationCap, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Lock, Mail, User, GraduationCap, ShieldCheck, ArrowRight } from 'lucide-react';
 
 export const LoginScreen: React.FC = () => {
   const { signIn, showToast } = useERP();
-  const [selectedUserId, setSelectedUserId] = useState('sindhu');
-  const [userIdInput, setUserIdInput] = useState('sindhu.konduru@oraclefusion.edu');
-  const [passwordInput, setPasswordInput] = useState('••••••••••••');
+  const [selectedRoleId, setSelectedRoleId] = useState('sindhu');
+  const [emailInput, setEmailInput] = useState('');
+  const [fullNameInput, setFullNameInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('AICITSS2026');
+  const [emailError, setEmailError] = useState('');
   const [forgotOpen, setForgotOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    signIn(selectedUserId);
+    const trimmed = emailInput.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailError('Please enter your valid email address (e.g., name@gmail.com or name@icai.org).');
+      return;
+    }
+    setEmailError('');
+    signIn(selectedRoleId, trimmed, fullNameInput);
   };
 
   return (
@@ -39,21 +47,44 @@ export const LoginScreen: React.FC = () => {
         <div className="w-full max-w-md bg-white border border-[#E2DCD5] rounded-[4px] shadow-sm p-8">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[12px] font-medium text-[#524C46] mb-1">User ID</label>
+              <label className="block text-[12px] font-medium text-[#524C46] mb-1">
+                * Student Email (User ID)
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => {
+                    setEmailInput(e.target.value);
+                    setEmailError('');
+                  }}
+                  placeholder="your.email@gmail.com"
+                  className="w-full pl-9 pr-3 py-2 border border-[#4A779D] bg-[#EEF4FA] rounded-[2px] text-[13px] focus:outline-none focus:ring-1 focus:ring-[#00688C]"
+                  required
+                />
+              </div>
+              {emailError && <p className="text-[11.5px] text-[#C74634] mt-1">{emailError}</p>}
+            </div>
+
+            <div>
+              <label className="block text-[12px] font-medium text-[#524C46] mb-1">
+                Full Name (shown on reports &amp; submission)
+              </label>
               <div className="relative">
                 <User className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
                 <input
                   type="text"
-                  value={userIdInput}
-                  onChange={(e) => setUserIdInput(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 border border-[#4A779D] bg-[#EEF4FA] rounded-[2px] text-[13px] focus:outline-none focus:ring-1 focus:ring-[#00688C]"
-                  required
+                  value={fullNameInput}
+                  onChange={(e) => setFullNameInput(e.target.value)}
+                  placeholder="e.g. Rahul Sharma (auto-filled if blank)"
+                  className="w-full pl-9 pr-3 py-2 border border-[#BCC6D0] bg-white rounded-[2px] text-[13px] focus:outline-none focus:ring-1 focus:ring-[#00688C]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[12px] font-medium text-[#524C46] mb-1">Password</label>
+              <label className="block text-[12px] font-medium text-[#524C46] mb-1">Password / Batch Code</label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
                 <input
@@ -74,11 +105,22 @@ export const LoginScreen: React.FC = () => {
               >
                 Forgot Password
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmailInput('sindhu.konduru@oraclefusion.edu');
+                  setFullNameInput('Sindhu Konduru');
+                  showToast('info', 'Demo Email Filled', 'Click Sign In to enter with the demo email.');
+                }}
+                className="text-[11.5px] text-[#00688C] hover:underline"
+              >
+                Use Demo Email
+              </button>
             </div>
 
             <button
               type="submit"
-              className="bg-[#312D2A] hover:bg-[#1E1B19] text-white text-[13px] font-medium px-6 py-2 rounded-[2px] transition-colors inline-flex items-center gap-2"
+              className="w-full justify-center bg-[#312D2A] hover:bg-[#1E1B19] text-white text-[13px] font-medium px-6 py-2.5 rounded-[2px] transition-colors inline-flex items-center gap-2"
             >
               Sign In <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -86,10 +128,10 @@ export const LoginScreen: React.FC = () => {
 
           {forgotOpen && (
             <div className="mt-4 p-3 bg-[#F4F6F9] border border-[#D6DFE6] rounded text-[12px] text-[#312D2A]">
-              <div className="font-semibold mb-1">Password Reset (Demo Environment)</div>
+              <div className="font-semibold mb-1">AICITSS Classroom Login Help</div>
               <p className="text-[#5E5852]">
-                This is an AICITSS CA Teaching Simulator. Use any of the pre-configured student roles below to sign in
-                instantly!
+                Enter your personal or ICAI email address above and your Full Name. Default batch password is{' '}
+                <strong>AICITSS2026</strong> (any password works in training mode).
               </p>
               <button
                 type="button"
@@ -102,29 +144,24 @@ export const LoginScreen: React.FC = () => {
           )}
         </div>
 
-        {/* CA Student Quick Role Picker */}
-        <div className="w-full max-w-2xl mt-8 bg-white border border-[#D6DFE6] rounded-[6px] p-5 shadow-sm">
+        {/* Starting Role Picker */}
+        <div className="w-full max-w-2xl mt-7 bg-white border border-[#D6DFE6] rounded-[6px] p-5 shadow-sm">
           <div className="flex items-center gap-2 text-[#00688C] font-semibold text-[13px] mb-1">
             <GraduationCap className="w-4 h-4" />
-            AICITSS — CA Student Training Mode (Select a Persona to Explore)
+            Select Starting ERP Role (You can switch roles anytime inside the app)
           </div>
           <p className="text-[12px] text-[#5E5852] mb-4">
-            New to Oracle Fusion ERP? Pick a role below and click <strong>Sign In</strong>. You can also switch roles
-            anytime from the top-right user menu to test <strong>Segregation of Duties (SoD)</strong>.
+            Enter your <strong>actual email</strong> above, pick a starting role below, and click <strong>Sign In</strong>. Your email &amp; name will be recorded on every transaction and your final Lab Submission CSV.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {DEMO_USERS.map((u) => {
-              const active = selectedUserId === u.id;
+              const active = selectedRoleId === u.id;
               return (
                 <button
                   key={u.id}
                   type="button"
-                  onClick={() => {
-                    setSelectedUserId(u.id);
-                    setUserIdInput(`${u.id}@oraclefusion.edu`);
-                    showToast('info', 'Role Selected', `Click "Sign In" to enter as ${u.name}`);
-                  }}
+                  onClick={() => setSelectedRoleId(u.id)}
                   className={`text-left p-3 rounded-[4px] border transition-all ${
                     active
                       ? 'border-[#00688C] bg-[#EDF6FA] ring-1 ring-[#00688C]'
@@ -136,8 +173,7 @@ export const LoginScreen: React.FC = () => {
                       {u.initials}
                     </span>
                     <div>
-                      <div className="text-[13px] font-semibold text-[#161513]">{u.name}</div>
-                      <div className="text-[11px] text-[#00688C] font-medium">{u.role}</div>
+                      <div className="text-[12.5px] font-semibold text-[#161513]">{u.role}</div>
                     </div>
                   </div>
                   <div className="text-[11px] text-[#5E5852] mt-1">{u.department}</div>
@@ -149,7 +185,7 @@ export const LoginScreen: React.FC = () => {
           <div className="mt-4 pt-3 border-t border-[#E6ECF0] flex items-center justify-between text-[11px] text-[#5E5852]">
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-[#2E7D32]" />
-              Includes full P2P, O2C, Trial Balance, Aging Reports & Companies Act 2013 Audit Trail
+              Supports 60+ concurrent students with per-student Audit Trail &amp; CSV Submission
             </span>
             <span>Unit 4 — Auditing of Financial Business Processes</span>
           </div>
