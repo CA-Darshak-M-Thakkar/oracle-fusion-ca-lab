@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  html, body, #root { max-width: 100%; overflow-x: hidden; }
+  html, body { max-width: 100%; }
+  #root { max-width: 100%; overflow-x: clip; }
   html { font-size: 18px; }
   html[data-font="100"] { font-size: 18px; }
   html[data-font="125"] { font-size: 22px; }

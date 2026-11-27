@@ -55,20 +55,7 @@ Nothing is stored in this browser except the practice ledger. Mobile numbers and
 
 The sheet is **Adv ITT - Oracle Fusion**. The web app URL is in `src/config/attendance.ts`. It is a Google Apps Script deployed as “Anyone”. Anyone who knows the URL can post a row. That is a real risk: do not put secrets in the sheet, and do not treat the sheet as a private system.
 
-### You must redeploy the script (same URL)
-
-The script that is live today accepts the post and returns `{"status":"ok"}`, but it stores the time as text. Because of that, Total counts rows and Today / Last 7 Days / This Month stay at 0. It also does not write the Notes column.
-
-Paste `public/sample-files/Google_Sheet_Logger_Apps_Script.gs` into the existing project, then:
-
-1. Deploy → **Manage deployments**
-2. Pencil (**Edit**) on the deployment that matches the URL in `attendance.ts`
-3. Version → **New version**
-4. Deploy
-
-Do not create a brand-new deployment. A new deployment changes the URL and the site would stop logging.
-
-After that, the next sign-in writes a real date in India time, puts Student or Teacher in Notes, converts older text timestamps, and fills the summary in columns H to J.
+The live web app is deployment version 3 of that same URL. Sign-in records name, email and role (Student or Teacher) on the sheet. The copy of the script in `public/sample-files/Google_Sheet_Logger_Apps_Script.gs` matches that deployment. A brand-new deployment would change the URL and the site would stop logging.
 
 ## Google sign-in
 

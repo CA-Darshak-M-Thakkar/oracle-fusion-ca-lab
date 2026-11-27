@@ -106,16 +106,18 @@ export const EBSClassicApp: React.FC<EBSClassicAppProps> = ({ onSwitchToFusion }
   return (
     <div className="min-h-screen bg-[#DCE4EC] flex flex-col font-sans select-none">
       {/* Classic Oracle Applications Top Bar */}
-      <div className="bg-[#2D5F7E] text-white px-3 py-1.5 flex items-center justify-between border-b border-[#1D4056] text-[12px]">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#1D4056] bg-[#2D5F7E] px-3 py-1.5 text-[12px] text-white">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
           <span className="font-bold tracking-wide text-[#FFE082]">ORACLE</span>
           <span>Older product: E-Business Suite R12 forms. Optional comparison only. Class labs are in Fusion Cloud.</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-[#CDE2EF]">User: {currentUser.name}</span>
           <button
+            type="button"
+            data-coach="switch-to-fusion"
             onClick={onSwitchToFusion}
-            className="bg-[#00688C] hover:bg-[#00526F] border border-white/40 text-white px-2.5 py-1 rounded-[2px] text-[11.5px] font-medium flex items-center gap-1.5"
+            className="flex items-center gap-1.5 rounded-[2px] border border-white/40 bg-[#00688C] px-2.5 py-1 text-[11.5px] font-medium text-white hover:bg-[#00526F]"
           >
             <Cloud className="w-3.5 h-3.5" /> Switch to Oracle Fusion Cloud UI
           </button>
