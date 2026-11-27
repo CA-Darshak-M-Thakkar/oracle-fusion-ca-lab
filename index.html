@@ -1,16 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark-theme" data-font="125">
   <head>
+    <script>
+      try {
+        if (localStorage.getItem('oracle_fusion_theme') === 'light') {
+          document.documentElement.classList.remove('dark-theme');
+          document.documentElement.classList.add('light-theme');
+        }
+        var font = localStorage.getItem('oracle_fusion_font') || '125';
+        document.documentElement.setAttribute('data-font', font);
+      } catch (e) {}
+    </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Oracle Applications Cloud — Fusion ERP Teaching Simulator (CA / AICITSS)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="./assets/index-DBhwSZgw.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Bn-SzwPN.css">
+    <script type="module" crossorigin src="./assets/index-Bv9IXIQl.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-uXrT5wm9.css">
   </head>
-  <body class="bg-[#F4F6F9] text-[#161513] antialiased selection:bg-[#00688C] selection:text-white">
-    <div id="root"></div>
+  <body class="antialiased">
+    <div id="root"></div>
   </body>
 </html>
