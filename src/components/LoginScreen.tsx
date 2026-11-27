@@ -16,33 +16,34 @@ export const LoginScreen: React.FC<{
 }> = ({ fontScale, onFont, dark, onToggleTheme }) => {
   const { signIn } = useERP();
   const btnRef = useRef<HTMLDivElement>(null);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [googleReady, setGoogleReady] = useState(false);
 
   useEffect(() => {
-    if (!GOOGLE_CLIENT_ID) return;
-    const existing = document.querySelector('script[data-gis="1"]');
     const boot = () => {
-      const google = (window as unknown as { google?: { accounts: { id: { initialize: (c: unknown) => void; renderButton: (el: HTMLElement, o: unknown) => void } } } }).google;
-      if (!google || !btnRef.current) return;
+      const google = (window as unknown as {
+        google?: { accounts: { id: { initialize: (c: unknown) => void; renderButton: (el: HTMLElement, o: unknown) => void } } };
+      }).google;
+      if (!google || !btnRef.current) {
+        setError('Google sign-in did not load. Check your connection and refresh the page.');
+        return;
+      }
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
         callback: (resp: { credential: string }) => {
           try {
             const payload = decodeJwt(resp.credential);
             if (!payload.email) {
-              setError('Google did not return an email. Try again.');
+              setError('Google did not return an email. Try Sign in with Google again.');
               return;
             }
             if (payload.email_verified === false) {
-              setError('This Google email is not verified.');
+              setError('This Google email is not verified. Use a verified Google account.');
               return;
             }
             signIn({ name: payload.name || payload.email, email: payload.email });
           } catch {
-            setError('Could not read the Google sign-in. Use the name and email form if it is shown.');
+            setError('Google sign-in could not be read. Refresh the page and try again.');
           }
         },
       });
@@ -54,7 +55,10 @@ export const LoginScreen: React.FC<{
         shape: 'rectangular',
       });
       setGoogleReady(true);
+      setError('');
     };
+
+    const existing = document.querySelector('script[data-gis="1"]');
     if (existing) {
       boot();
       return;
@@ -64,25 +68,9 @@ export const LoginScreen: React.FC<{
     script.async = true;
     script.dataset.gis = '1';
     script.onload = boot;
-    script.onerror = () => setError('Google sign-in did not load. Check the network and try again.');
+    script.onerror = () => setError('Google sign-in did not load. Check your connection and refresh the page.');
     document.body.appendChild(script);
   }, [signIn]);
-
-  const submitFallback = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanName = name.trim();
-    const cleanEmail = email.trim().toLowerCase();
-    if (cleanName.length < 3) {
-      setError('Enter your full name (at least 3 letters).');
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setError('Enter a real email, such as name@gmail.com.');
-      return;
-    }
-    setError('');
-    signIn({ name: cleanName, email: cleanEmail });
-  };
 
   return (
     <div className="login-screen min-h-screen px-4 py-8">
@@ -112,34 +100,24 @@ export const LoginScreen: React.FC<{
             Sign in with the Google account you use in class. We take your name and email only, and mark you present.
           </p>
 
-          {GOOGLE_CLIENT_ID ? (
-            <div className="mt-6">
-              <div ref={btnRef} className="min-h-[44px]" />
-              {!googleReady && <p className="mt-3 text-lg">Loading Google sign-in…</p>}
-            </div>
-          ) : (
-            <form onSubmit={submitFallback} className="mt-6 space-y-4">
-              <p className="text-lg leading-snug">
-                Google sign-in is not switched on yet (no client ID). Use your name and email. The teacher’s email still opens teacher mode.
-              </p>
-              <label className="block text-lg">
-                Full name
-                <input className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-3 py-3 text-xl" value={name} onChange={(e) => setName(e.target.value)} placeholder="Priya Shah" />
-              </label>
-              <label className="block text-lg">
-                Email
-                <input className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-3 py-3 text-xl" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@gmail.com" inputMode="email" />
-              </label>
-              <button type="submit" className="w-full rounded-md bg-amber-400 px-4 py-3 text-xl font-semibold text-slate-950">
-                Sign in
-              </button>
-            </form>
-          )}
+          <div className="mt-6">
+            <div ref={btnRef} className="min-h-[44px]" />
+            {!googleReady && !error && <p className="mt-3 text-lg">Loading Google sign-in…</p>}
+          </div>
 
-          {error && <p className="mt-4 rounded border border-rose-400 bg-rose-950 px-3 py-2 text-lg text-rose-100">{error}</p>}
+          {error && (
+            <p className="mt-4 rounded border border-rose-400 bg-rose-950 px-3 py-3 text-lg leading-snug text-rose-100" role="alert">
+              {error}
+            </p>
+          )}
 
           <p className="mt-5 text-base leading-snug text-slate-300">
             Signing in records your name, email and whether you are a Student or the Teacher on the class sheet. Do not type a password here.
+          </p>
+          <p className="mt-3 text-base">
+            <a className="text-sky-300 underline" href="./privacy.html">Privacy</a>
+            <span className="mx-2 text-slate-500">·</span>
+            <a className="text-sky-300 underline" href="./terms.html">Terms</a>
           </p>
         </div>
       </div>

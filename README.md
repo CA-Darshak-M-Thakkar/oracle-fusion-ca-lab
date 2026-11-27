@@ -36,7 +36,7 @@ Only these emails open the presenter panel (talking points, jump to any step, fr
 
 The list is `TEACHER_EMAILS` in `src/config/auth.ts`. Students never see that panel. Add another teacher by editing that list and redeploying the site.
 
-Sign in with Google when a client ID is set. Until then, the login screen asks for name and email. Typing the teacher email on that form also opens teacher mode.
+Sign-in is Google only. The teacher email `cadmthakkar@gmail.com` opens teacher mode. Other Google accounts stay in the student path.
 
 ## Sign-in and the attendance sheet
 
@@ -68,21 +68,13 @@ Do not create a brand-new deployment. A new deployment changes the URL and the s
 
 After that, the next sign-in writes a real date in India time, puts Student or Teacher in Notes, converts older text timestamps, and fills the summary in columns H to J.
 
-## Google sign-in (when you have a client ID)
+## Google sign-in
 
-1. Open [Google Cloud Console](https://console.cloud.google.com/) and pick or create a project.
-2. APIs & Services → OAuth consent screen. Choose External (or Internal if the class is on one Workspace). Add the app name “ABC Fusion classroom”. Add your email as a test user if the app stays in testing.
-3. APIs & Services → Credentials → Create credentials → **OAuth client ID**.
-4. Application type: **Web application**.
-5. Authorised JavaScript origins — add exactly:
-   - `https://ca-darshak-m-thakkar.github.io`
-   - For a local class rehearsal, also `http://localhost:5173`
-   Do not put the `/oracle-fusion-ca-lab` path in the origin. Origins have no path.
-6. Create. Copy the client ID (it ends in `.apps.googleusercontent.com`).
-7. Paste it in `src/config/auth.ts` as the value used when `VITE_GOOGLE_CLIENT_ID` is empty, **or** build with `VITE_GOOGLE_CLIENT_ID=your-id npm run build`.
-8. Commit, push, and publish GitHub Pages again (see below).
+The login screen is **Sign in with Google** only. The web client ID is in `src/config/auth.ts`. The OAuth app is in production. Authorised JavaScript origins are `https://ca-darshak-m-thakkar.github.io` and `http://localhost:5173` (no path after the host).
 
-Until that ID is present, the site shows the name and email form so class can continue.
+If you rotate the client, replace that constant or build with `VITE_GOOGLE_CLIENT_ID=your-id npm run build`, then publish GitHub Pages again.
+
+Privacy and terms are `privacy.html` and `terms.html` on the same site. They say the class collects name and email only, writes them to the teacher’s Google Sheet, and does not sell or share them. Contact is cadmthakkar@gmail.com.
 
 ## Deploy
 
