@@ -15,8 +15,8 @@ export const InventoryShippingModule: React.FC = () => {
     confirmShipment,
   } = useERP();
 
-  const [shippingMethod, setShippingMethod] = useState('Fed EX-Parcel-Truck');
-  const [waybill, setWaybill] = useState('FDX-9920144');
+  const [shippingMethod, setShippingMethod] = useState('Blue Dart Surface');
+  const [waybill, setWaybill] = useState('BD-2001');
   const [packingSlipShipmentId, setPackingSlipShipmentId] = useState<string | null>(null);
 
   // Edit Shipment & Ship Confirm (Page 66)
@@ -29,7 +29,7 @@ export const InventoryShippingModule: React.FC = () => {
         title={`Edit Shipment: ${shp.id}`}
         route="edit_shipment"
         caConceptTitle="CA Concept: Ship Confirmation & Revenue Recognition"
-        caConceptBody="Clicking 'Ship Confirm' formally dispatches goods to the carrier, generates the Packing Slip, deducts Inventory, and triggers AutoInvoice in Receivables (Transfer of Risks & Rewards under AS-9 / Ind AS 115)."
+        caConceptBody="Ship Confirm hands the goods to the carrier. Revenue is recorded then, because the customer has control of the goods (Ind AS 115). A packing slip and a bill of lading are prepared. Cost of goods sold is also posted."
         actions={
           <div className="flex gap-2">
             {shp.status !== 'Confirmed' && (
@@ -38,6 +38,7 @@ export const InventoryShippingModule: React.FC = () => {
                   confirmShipment(shp.id, shippingMethod, waybill);
                   setPackingSlipShipmentId(shp.id);
                 }}
+                data-coach="ship-confirm"
                 className="oracle-btn-primary"
               >
                 <Truck className="w-3.5 h-3.5" /> Ship Confirm
@@ -219,6 +220,7 @@ export const InventoryShippingModule: React.FC = () => {
                           const shp = createPickWaveAndConfirm(so.id);
                           if (shp) navigate('edit_shipment', shp.id);
                         }}
+                        data-coach="release-pick"
                         className="oracle-btn-primary"
                       >
                         <PackageCheck className="w-3.5 h-3.5" /> Release Pick Wave & Confirm Pick

@@ -38,14 +38,14 @@ export const RequisitionsModule: React.FC = () => {
 
   // Create Noncatalog Form State
   const [itemType, setItemType] = useState<'Goods' | 'Fixed Price Services'>('Goods');
-  const [description, setDescription] = useState('Annual maintenance');
-  const [category, setCategory] = useState('Miscellaneous');
-  const [quantity, setQuantity] = useState(1);
-  const [uom, setUom] = useState('01EACH');
-  const [price, setPrice] = useState(1000);
+  const [description, setDescription] = useState('Office Chair');
+  const [category, setCategory] = useState('Furniture');
+  const [quantity, setQuantity] = useState(10);
+  const [uom, setUom] = useState('Nos');
+  const [price, setPrice] = useState(5000);
   const [currency, setCurrency] = useState('INR');
-  const [supplierName, setSupplierName] = useState('MURALI TECHNOLOGIES');
-  const [justification, setJustification] = useState('Annual ERP & IT support contract');
+  const [supplierName, setSupplierName] = useState('Sharma Traders');
+  const [justification, setJustification] = useState('Chairs for the accounts room');
 
   const handleAddNoncatalogToCart = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +59,7 @@ export const RequisitionsModule: React.FC = () => {
       price,
       currency,
       amount: quantity * price,
+      itemCode: description,
       supplierName,
       needByDate: '2026-12-15',
     });
@@ -104,7 +105,7 @@ export const RequisitionsModule: React.FC = () => {
               >
                 Add to Shopping List
               </button>
-              <button type="submit" className="oracle-btn-primary">
+              <button type="submit" data-coach="add-to-cart" className="oracle-btn-primary">
                 <Plus className="w-3.5 h-3.5" /> Add to Cart
               </button>
             </div>
@@ -238,6 +239,7 @@ export const RequisitionsModule: React.FC = () => {
                   const req = createRequisitionFromCart(description, justification, false);
                   navigate('edit_requisition', req.id);
                 }}
+                data-coach="review-requisition"
                 className="oracle-btn-primary"
               >
                 Review & Submit Requisition →
@@ -277,6 +279,7 @@ export const RequisitionsModule: React.FC = () => {
                   submitRequisition(req.id);
                   navigate('purchase_requisitions');
                 }}
+                data-coach="submit-requisition"
                 className="oracle-btn-primary"
               >
                 Submit
@@ -284,6 +287,7 @@ export const RequisitionsModule: React.FC = () => {
             )}
             {req.status === 'Pending approval' && (
               <button
+                data-coach="approve-requisition"
                 onClick={() => approveRequisition(req.id)}
                 className="oracle-btn-primary"
               >
@@ -497,7 +501,7 @@ export const RequisitionsModule: React.FC = () => {
                         onClick={() => {
                           const req = createRequisitionFromCart(cart[0].line.description, 'Operational need', true);
                           setCartOpen(false);
-                          showToast('success', 'Submitted', `Requisition ${req.id} submitted and approved!`);
+                          showToast('success', 'Sent for approval', `Request ${req.id} is waiting. You cannot approve it yourself.`);
                         }}
                         className="oracle-btn-primary"
                       >

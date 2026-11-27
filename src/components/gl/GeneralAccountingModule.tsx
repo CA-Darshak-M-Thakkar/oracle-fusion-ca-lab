@@ -77,13 +77,13 @@ export const GeneralAccountingModule: React.FC = () => {
                 />
               </div>
               <button type="submit" className="oracle-btn-primary w-full justify-center">
-                Post Journal to US_Primary_Ledger
+                Post Journal to ABC India Primary Ledger
               </button>
             </form>
           </div>
 
           <div className="lg:col-span-8 oracle-panel p-5">
-            <h3 className="text-[14px] font-semibold mb-3">Posted Journals (US_Primary_Ledger)</h3>
+            <h3 className="text-[14px] font-semibold mb-3" data-coach="journal-list">Posted Journals (ABC India Primary Ledger)</h3>
             <div className="space-y-3">
               {journals.map((je) => (
                 <div key={je.id} className="border border-[#D6DFE6] rounded p-3.5 bg-[#FAFBFD]">
@@ -153,7 +153,7 @@ export const GeneralAccountingModule: React.FC = () => {
       <div className="oracle-panel p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-[13px]">
-            Ledger: <strong>US_Primary_Ledger</strong> | Currency: <strong>INR</strong>
+            Ledger: <strong>ABC India Primary Ledger</strong> | Currency: <strong>INR</strong>
           </div>
           <input
             type="text"
@@ -164,7 +164,7 @@ export const GeneralAccountingModule: React.FC = () => {
           />
         </div>
 
-        <div className="overflow-x-auto border border-[#D6DFE6] rounded">
+        <div data-coach="gl-balances" className="overflow-x-auto border border-[#D6DFE6] rounded">
           <table className="w-full text-[12.5px] text-left">
             <thead className="oracle-table-header">
               <tr>

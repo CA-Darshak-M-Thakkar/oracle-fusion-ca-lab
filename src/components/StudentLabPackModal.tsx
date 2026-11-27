@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { X, Download, CheckCircle2, Circle, FileSpreadsheet, ClipboardCheck, Users } from 'lucide-react';
 import { useERP } from '../context/ERPContext';
+import {
+  INITIAL_REQUISITIONS,
+  INITIAL_POS,
+  INITIAL_RECEIPTS,
+  INITIAL_AP_INVOICES,
+  INITIAL_AP_PAYMENTS,
+  INITIAL_SALES_ORDERS,
+  INITIAL_JOURNALS,
+  INITIAL_SCHEDULED_JOBS,
+} from '../data/seedData';
 
 interface StudentLabPackModalProps {
   open: boolean;
@@ -23,21 +33,20 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
   } = useERP();
 
   const [studentName, setStudentName] = useState(currentUser.name);
-  const [rollNumber, setRollNumber] = useState(currentUser.wroNo ?? 'WRO0000000');
 
   if (!open) return null;
 
   // Auto-detect which tasks the student has actually performed beyond initial seed data
   const tasks = [
-    { id: 'T1', label: 'Create & Submit a Purchase Requisition', done: requisitions.length > 4 },
-    { id: 'T2', label: 'Convert Requisition to Open Purchase Order', done: purchaseOrders.length > 2 },
-    { id: 'T3', label: 'Receive Goods & Generate GRN', done: receipts.length > 2 },
-    { id: 'T4', label: 'Create AP Invoice & Run 3-Way Match', done: apInvoices.length > 4 },
-    { id: 'T5', label: 'Issue Supplier Payment', done: apPayments.length > 1 },
-    { id: 'T6', label: 'Create Sales Order in Order Management', done: salesOrders.length > 2 },
-    { id: 'T7', label: 'Release Pick Wave & Ship Confirm (Packing Slip)', done: shipments.some((s) => s.status === 'Confirmed') },
-    { id: 'T8', label: 'Collect & Apply Customer AR Receipt', done: arReceipts.length > 0 },
-    { id: 'T9', label: 'Post Manual Journal or Run Scheduled Report', done: scheduledJobs.length > 3 || journals.length > 2 },
+    { id: 'T1', label: 'Create and submit a purchase request', done: requisitions.length > INITIAL_REQUISITIONS.length },
+    { id: 'T2', label: 'Turn a request into a purchase order', done: purchaseOrders.length > INITIAL_POS.length },
+    { id: 'T3', label: 'Receive the chairs', done: receipts.length > INITIAL_RECEIPTS.length },
+    { id: 'T4', label: 'Match a supplier bill', done: apInvoices.length > INITIAL_AP_INVOICES.length },
+    { id: 'T5', label: 'Pay a supplier', done: apPayments.length > INITIAL_AP_PAYMENTS.length },
+    { id: 'T6', label: 'Create a sales order', done: salesOrders.length > INITIAL_SALES_ORDERS.length },
+    { id: 'T7', label: 'Ship and prepare a packing slip', done: shipments.some((s) => s.status === 'Confirmed') },
+    { id: 'T8', label: 'Apply a customer receipt', done: arReceipts.some((r) => r.appliedAmount > 0) },
+    { id: 'T9', label: 'Post a journal or run a report', done: scheduledJobs.length > INITIAL_SCHEDULED_JOBS.length || journals.length > INITIAL_JOURNALS.length },
   ];
 
   const completedCount = tasks.filter((t) => t.done).length;
@@ -45,9 +54,8 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
   const downloadSubmissionProof = () => {
     const rows = [
       ['Student Name', studentName],
-      ['Student Email', currentUser.email ?? 'N/A'],
-      ['Mobile No', currentUser.mobile ?? 'N/A'],
-      ['WRO / ICAI Reg No', rollNumber],
+      ['Student Email', currentUser.email ?? ''],
+      ['Role', currentUser.isTeacher ? 'Teacher' : 'Student'],
       ['Completed Tasks', `${completedCount} / ${tasks.length}`],
       ['Timestamp', new Date().toISOString()],
       [],
@@ -59,7 +67,7 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${rollNumber}_Oracle_Fusion_Lab_Submission.csv`;
+    a.download = `Oracle_Fusion_Lab_Submission.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -163,15 +171,6 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
                   type="text"
                   value={studentName}
                   onChange={(e) => setStudentName(e.target.value)}
-                  className="oracle-input w-full"
-                />
-              </div>
-              <div className="flex-1 min-w-[160px]">
-                <label className="block text-[11px] text-[#5E6C7A] mb-1">ICAI Reg / Roll Number</label>
-                <input
-                  type="text"
-                  value={rollNumber}
-                  onChange={(e) => setRollNumber(e.target.value)}
                   className="oracle-input w-full"
                 />
               </div>

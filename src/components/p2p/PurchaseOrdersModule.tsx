@@ -14,12 +14,13 @@ export const PurchaseOrdersModule: React.FC = () => {
     createPOFromRequisition,
     updatePO,
     submitPO,
+    approvePO,
   } = useERP();
 
   const [reqSearch, setReqSearch] = useState('');
   const [selectedReqId, setSelectedReqId] = useState<string | null>(null);
   const [docBuilderOpen, setDocBuilderOpen] = useState(false);
-  const [docBuilderSupplier, setDocBuilderSupplier] = useState('MURALI TECHNOLOGIES');
+  const [docBuilderSupplier, setDocBuilderSupplier] = useState('Sharma Traders');
   const [stagedReqId, setStagedReqId] = useState<string | null>(null);
   const [pdfModalPO, setPdfModalPO] = useState<string | null>(null);
 
@@ -82,14 +83,20 @@ export const PurchaseOrdersModule: React.FC = () => {
               <div className="flex items-center justify-between mb-3">
                 <span className="text-[13.5px] font-semibold">Search Results: Approved Requisition Lines</span>
                 <button
-                  disabled={!selectedReqId}
                   onClick={() => {
-                    const req = requisitions.find((r) => r.id === selectedReqId);
+                    const chosenId =
+                      selectedReqId ||
+                      approvedReqs.find((r) => r.lines.some((l) => l.description === 'Office Chair'))?.id ||
+                      approvedReqs[0]?.id;
+                    if (!chosenId) return;
+                    setSelectedReqId(chosenId);
+                    const req = requisitions.find((r) => r.id === chosenId);
                     if (req?.lines[0]?.supplierName) {
                       setDocBuilderSupplier(req.lines[0].supplierName);
                     }
                     setDocBuilderOpen(true);
                   }}
+                  data-coach="add-to-document-builder"
                   className="oracle-btn-primary"
                 >
                   Add to Document Builder
@@ -151,7 +158,7 @@ export const PurchaseOrdersModule: React.FC = () => {
               </p>
             ) : (
               <div className="space-y-3 text-[12.5px]">
-                <div><span className="text-[#5E6C7A]">Procurement BU:</span> <strong>US1 Business Unit</strong></div>
+                <div><span className="text-[#5E6C7A]">Procurement BU:</span> <strong>ABC Mumbai Business Unit</strong></div>
                 <div><span className="text-[#5E6C7A]">Type:</span> New Order (Purchase Order)</div>
                 <div><span className="text-[#5E6C7A]">Supplier:</span> <strong>{docBuilderSupplier}</strong></div>
                 <div className="p-2.5 bg-[#F8FAFC] border rounded">
@@ -169,6 +176,7 @@ export const PurchaseOrdersModule: React.FC = () => {
                         navigate('edit_po', po.id);
                       }
                     }}
+                    data-coach="create-po"
                     className="oracle-btn-primary flex-1 justify-center"
                   >
                     Create
@@ -220,6 +228,7 @@ export const PurchaseOrdersModule: React.FC = () => {
                     setStagedReqId(selectedReqId);
                     setDocBuilderOpen(false);
                   }}
+                  data-coach="doc-builder-ok"
                   className="oracle-btn-primary"
                 >
                   OK
@@ -245,18 +254,23 @@ export const PurchaseOrdersModule: React.FC = () => {
         title={`Edit Document (Purchase Order): ${po.id}`}
         route="edit_po"
         caConceptTitle="CA Concept: Purchase Order (PO)"
-        caConceptBody="A Purchase Order is a legally binding contract with the vendor specifying item, quantity, price, and payment terms. Once submitted for approval, its status changes from 'Incomplete' to 'Open'."
+        caConceptBody="A purchase order is the promise to the supplier: item, quantity and price. Submit sends it for approval. It stays Pending Approval until a different person approves it. Then it is Open and can be received."
         actions={
           <div className="flex items-center gap-2">
             <button onClick={() => setPdfModalPO(po.id)} className="oracle-btn-secondary">
               <Printer className="w-3.5 h-3.5" /> View PDF
             </button>
             {po.status === 'Incomplete' && (
-              <button onClick={() => submitPO(po.id)} className="oracle-btn-primary">
+              <button data-coach="submit-po" onClick={() => submitPO(po.id)} className="oracle-btn-primary">
                 Submit
               </button>
             )}
-            {po.status === 'Open' && (
+            {po.status === 'Pending Approval' && (
+              <button data-coach="approve-po" onClick={() => approvePO(po.id)} className="oracle-btn-primary">
+                Approve
+              </button>
+            )}
+            {(po.status === 'Open' || po.status === 'Closed for Receiving') && (
               <button onClick={() => navigate('my_receipts')} className="oracle-btn-primary">
                 Receive Goods (GRN) →
               </button>

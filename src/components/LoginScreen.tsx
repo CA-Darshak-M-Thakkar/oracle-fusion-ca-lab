@@ -1,164 +1,146 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useERP } from '../context/ERPContext';
-import { Mail, User, Phone, BadgeCheck, ShieldCheck, ArrowRight } from 'lucide-react';
+import { GOOGLE_CLIENT_ID } from '../config/auth';
 
-export const LoginScreen: React.FC = () => {
+function decodeJwt(token: string): { name?: string; email?: string; email_verified?: boolean } {
+  const part = token.split('.')[1] || '';
+  const json = atob(part.replace(/-/g, '+').replace(/_/g, '/'));
+  return JSON.parse(json);
+}
+
+export const LoginScreen: React.FC<{
+  fontScale: string;
+  onFont: (v: string) => void;
+  dark: boolean;
+  onToggleTheme: () => void;
+}> = ({ fontScale, onFont, dark, onToggleTheme }) => {
   const { signIn } = useERP();
-  const [emailInput, setEmailInput] = useState('');
-  const [fullNameInput, setFullNameInput] = useState('');
-  const [mobileInput, setMobileInput] = useState('');
-  const [wroInput, setWroInput] = useState('');
-  const [formError, setFormError] = useState('');
+  const btnRef = useRef<HTMLDivElement>(null);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [googleReady, setGoogleReady] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    const existing = document.querySelector('script[data-gis="1"]');
+    const boot = () => {
+      const google = (window as unknown as { google?: { accounts: { id: { initialize: (c: unknown) => void; renderButton: (el: HTMLElement, o: unknown) => void } } } }).google;
+      if (!google || !btnRef.current) return;
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: (resp: { credential: string }) => {
+          try {
+            const payload = decodeJwt(resp.credential);
+            if (!payload.email) {
+              setError('Google did not return an email. Try again.');
+              return;
+            }
+            if (payload.email_verified === false) {
+              setError('This Google email is not verified.');
+              return;
+            }
+            signIn({ name: payload.name || payload.email, email: payload.email });
+          } catch {
+            setError('Could not read the Google sign-in. Use the name and email form if it is shown.');
+          }
+        },
+      });
+      google.accounts.id.renderButton(btnRef.current, {
+        theme: 'filled_blue',
+        size: 'large',
+        text: 'signin_with',
+        width: 360,
+        shape: 'rectangular',
+      });
+      setGoogleReady(true);
+    };
+    if (existing) {
+      boot();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.dataset.gis = '1';
+    script.onload = boot;
+    script.onerror = () => setError('Google sign-in did not load. Check the network and try again.');
+    document.body.appendChild(script);
+  }, [signIn]);
+
+  const submitFallback = (e: React.FormEvent) => {
     e.preventDefault();
-    const email = emailInput.trim();
-    const name = fullNameInput.trim();
-    const mobile = mobileInput.replace(/\D/g, '');
-    const wroNo = wroInput.trim().toUpperCase();
-
-    if (name.length < 3) {
-      setFormError('Full Name is compulsory (minimum 3 characters).');
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    if (cleanName.length < 3) {
+      setError('Enter your full name (at least 3 letters).');
       return;
     }
-    if (wroNo.length < 5) {
-      setFormError('WRO / ICAI Registration No. is compulsory (e.g., WRO0612345).');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+      setError('Enter a real email, such as name@gmail.com.');
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setFormError('Please enter a valid Email address (e.g., name@gmail.com).');
-      return;
-    }
-    if (mobile.length !== 10) {
-      setFormError('Mobile No. is compulsory (enter a valid 10-digit mobile number).');
-      return;
-    }
-
-    setFormError('');
-    signIn('sindhu', { email, name, mobile, wroNo });
+    setError('');
+    signIn({ name: cleanName, email: cleanEmail });
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FBF9F6]">
-      {/* Top Dark Redwood Header */}
-      <div className="bg-[#2C2825] text-white px-8 py-5">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-[13px] text-[#D8D3CC] font-normal">Sign In — AICITSS Student Attendance &amp; ERP Lab</div>
-          <h1 className="text-[25px] font-light tracking-wide mt-0.5">Oracle Applications Cloud</h1>
-        </div>
-      </div>
-
-      {/* Redwood Geometric Strip */}
-      <div
-        className="h-3 w-full"
-        style={{
-          background:
-            'repeating-linear-gradient(125deg, #9E3B2B 0px, #9E3B2B 28px, #D4843E 28px, #D4843E 56px, #4D7358 56px, #4D7358 84px, #355C7D 84px, #355C7D 112px)',
-        }}
-      />
-
-      {/* Main Login Form */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-10">
-        <div className="w-full max-w-lg bg-white border border-[#E2DCD5] rounded-[4px] shadow-sm p-8">
-          <div className="text-[12px] text-[#5E5852] mb-5 pb-2.5 border-b border-[#EFEAE4]">
-            All fields marked with <span className="text-[#C74634] font-bold">*</span> are compulsory. Your login is recorded for AICITSS lab attendance.
+    <div className="login-screen min-h-screen px-4 py-8">
+      <div className="mx-auto flex max-w-xl flex-col gap-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-lg text-sky-300">AICITSS classroom</p>
+            <h1 className="text-4xl font-semibold leading-tight">Oracle Fusion practice</h1>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[12px] font-medium text-[#524C46] mb-1">
-                  <span className="text-[#C74634]">*</span> Full Name
-                </label>
-                <div className="relative">
-                  <User className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    value={fullNameInput}
-                    onChange={(e) => setFullNameInput(e.target.value)}
-                    placeholder="e.g. Rahul Sharma"
-                    className="w-full pl-9 pr-3 py-2 border border-[#BCC6D0] bg-white rounded-[2px] text-[13px] focus:outline-none focus:ring-1 focus:ring-[#00688C]"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-medium text-[#524C46] mb-1">
-                  <span className="text-[#C74634]">*</span> WRO / ICAI Reg. No.
-                </label>
-                <div className="relative">
-                  <BadgeCheck className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    value={wroInput}
-                    onChange={(e) => setWroInput(e.target.value.toUpperCase())}
-                    placeholder="e.g. WRO0612345"
-                    className="w-full pl-9 pr-3 py-2 border border-[#BCC6D0] bg-white rounded-[2px] text-[13px] uppercase focus:outline-none focus:ring-1 focus:ring-[#00688C]"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-[12px] font-medium text-[#524C46] mb-1">
-                  <span className="text-[#C74634]">*</span> Student Email
-                </label>
-                <div className="relative">
-                  <Mail className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
-                  <input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="your.email@gmail.com"
-                    className="w-full pl-9 pr-3 py-2 border border-[#4A779D] bg-[#EEF4FA] rounded-[2px] text-[13px] focus:outline-none focus:ring-1 focus:ring-[#00688C]"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[12px] font-medium text-[#524C46] mb-1">
-                  <span className="text-[#C74634]">*</span> Mobile No. (10 digits)
-                </label>
-                <div className="relative">
-                  <Phone className="w-4 h-4 text-[#8C847C] absolute left-3 top-2.5" />
-                  <input
-                    type="tel"
-                    maxLength={10}
-                    value={mobileInput}
-                    onChange={(e) => setMobileInput(e.target.value.replace(/\D/g, ''))}
-                    placeholder="9876543210"
-                    className="w-full pl-9 pr-3 py-2 border border-[#BCC6D0] bg-white rounded-[2px] text-[13px] focus:outline-none focus:ring-1 focus:ring-[#00688C]"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-
-            {formError && (
-              <div className="p-2.5 bg-red-50 border border-red-200 text-[#C74634] text-[12px] rounded">
-                {formError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full justify-center bg-[#312D2A] hover:bg-[#1E1B19] text-white text-[13px] font-medium px-6 py-2.5 rounded-[2px] transition-colors inline-flex items-center gap-2 mt-2"
-            >
-              Sign In to Oracle ERP <ArrowRight className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-2">
+            <label className="text-lg">
+              Text
+              <select className="ml-2 rounded bg-slate-800 px-2 py-2 text-lg" value={fontScale} onChange={(e) => onFont(e.target.value)}>
+                <option value="100">100%</option>
+                <option value="125">125%</option>
+                <option value="150">150%</option>
+              </select>
+            </label>
+            <button type="button" className="rounded bg-slate-700 px-3 py-2 text-lg" onClick={onToggleTheme}>
+              {dark ? 'Light theme' : 'Dark theme'}
             </button>
-          </form>
-
-          <div className="mt-5 pt-3 border-t border-[#E6ECF0] flex items-center justify-between text-[11px] text-[#5E5852]">
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#2E7D32]" />
-              Oracle Fusion Cloud &amp; EBS R12 Simulator
-            </span>
-            <span>AICITSS Unit 4</span>
           </div>
+        </div>
+
+        <div className="login-card rounded-xl border p-6 sm:p-8">
+          <p className="text-xl leading-snug">
+            Sign in with the Google account you use in class. We take your name and email only, and mark you present.
+          </p>
+
+          {GOOGLE_CLIENT_ID ? (
+            <div className="mt-6">
+              <div ref={btnRef} className="min-h-[44px]" />
+              {!googleReady && <p className="mt-3 text-lg">Loading Google sign-in…</p>}
+            </div>
+          ) : (
+            <form onSubmit={submitFallback} className="mt-6 space-y-4">
+              <p className="text-lg leading-snug">
+                Google sign-in is not switched on yet (no client ID). Use your name and email. The teacher’s email still opens teacher mode.
+              </p>
+              <label className="block text-lg">
+                Full name
+                <input className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-3 py-3 text-xl" value={name} onChange={(e) => setName(e.target.value)} placeholder="Priya Shah" />
+              </label>
+              <label className="block text-lg">
+                Email
+                <input className="mt-1 w-full rounded border border-slate-500 bg-slate-900 px-3 py-3 text-xl" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@gmail.com" inputMode="email" />
+              </label>
+              <button type="submit" className="w-full rounded-md bg-amber-400 px-4 py-3 text-xl font-semibold text-slate-950">
+                Sign in
+              </button>
+            </form>
+          )}
+
+          {error && <p className="mt-4 rounded border border-rose-400 bg-rose-950 px-3 py-2 text-lg text-rose-100">{error}</p>}
+
+          <p className="mt-5 text-base leading-snug text-slate-300">
+            Signing in records your name, email and whether you are a Student or the Teacher on the class sheet. Do not type a password here.
+          </p>
         </div>
       </div>
     </div>

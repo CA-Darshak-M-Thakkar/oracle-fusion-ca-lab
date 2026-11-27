@@ -29,7 +29,9 @@ export type ModuleRoute =
   | 'journals'
   | 'scheduled_processes'
   | 'audit_reports'
-  | 'ca_audit_lab';
+  | 'ca_audit_lab'
+  | 'orientation'
+  | 'bank_reconciliation';
 
 export type SpringboardTab =
   | 'Me'
@@ -44,16 +46,18 @@ export type SpringboardTab =
 
 export interface UserProfile {
   id: string;
+  roleId: string;
   name: string;
   email?: string;
-  mobile?: string;
-  wroNo?: string;
-  batchCode?: string;
   initials: string;
   role: string;
   department: string;
   canApprovePO: boolean;
   canCreatePayment: boolean;
+  canCreateInvoice: boolean;
+  canReceive: boolean;
+  approvalLimit: number;
+  isTeacher: boolean;
 }
 
 export interface Supplier {
@@ -67,6 +71,8 @@ export interface Supplier {
   paymentTerms: string;
   bankAccount: string;
   bankName: string;
+  gstin: string;
+  state: string;
 }
 
 export interface Customer {
@@ -78,6 +84,8 @@ export interface Customer {
   shipToAddress: string;
   creditLimit: number;
   paymentTerms: string;
+  gstin: string;
+  state: string;
 }
 
 export interface ItemMaster {
@@ -86,6 +94,7 @@ export interface ItemMaster {
   category: string;
   uom: string;
   unitPrice: number;
+  standardCost: number;
   onHandQty: number;
   status: 'Active' | 'Inactive';
 }
@@ -113,6 +122,7 @@ export interface Requisition {
   preparer: string;
   justification: string;
   status: 'Incomplete' | 'Pending approval' | 'Approved' | 'Rejected' | 'Converted to PO';
+  createdByRole?: string;
   createdAt: string;
   totalAmount: number;
   currency: string;
@@ -121,6 +131,7 @@ export interface Requisition {
 
 export interface PurchaseOrderLine {
   lineNumber: number;
+  itemCode?: string;
   description: string;
   category: string;
   quantity: number;
@@ -150,6 +161,8 @@ export interface PurchaseOrder {
   billToLocation: string;
   description: string;
   requisitionId?: string;
+  createdByRole?: string;
+  trainingCase?: boolean;
   orderedAmount: number;
   taxAmount: number;
   totalAmount: number;
@@ -187,11 +200,20 @@ export interface APInvoice {
   currency: string;
   amount: number;
   unpaidAmount: number;
-  status: 'Needs Revalidation' | 'Validated' | 'Approved' | 'Paid' | 'Partially Paid';
+  status: 'Needs Revalidation' | 'Validated' | 'Approved' | 'On Hold' | 'Paid' | 'Partially Paid';
   matchStatus: 'Matched (3-Way)' | 'Price Variance' | 'Qty Variance' | 'Unmatched (No PO)';
   postedToLedger: boolean;
   description: string;
   createdBy: string;
+  createdByRole?: string;
+  quantity?: number;
+  unitPrice?: number;
+  taxableAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  igst?: number;
+  holdReason?: string;
+  holdReleased?: boolean;
 }
 
 export interface APPayment {
@@ -232,6 +254,7 @@ export interface SalesOrder {
   orderedDate: string;
   paymentTerms: string;
   status: 'Draft' | 'Awaiting Shipping' | 'Picked' | 'Shipped' | 'Closed' | 'On Hold';
+  discountPercent?: number;
   totalAmount: number;
   currency: string;
   lines: SalesOrderLine[];
@@ -245,6 +268,7 @@ export interface Shipment {
   shipToLocation: string;
   shippingMethod: string;
   waybill: string;
+  billOfLading?: string;
   initialShipDate: string;
   status: 'Open' | 'Staged' | 'Confirmed';
   packingSlipGenerated: boolean;
@@ -272,6 +296,10 @@ export interface ARTransaction {
   daysPastDue: number;
   paymentTerms: string;
   currency: string;
+  taxableAmount?: number;
+  cgst?: number;
+  sgst?: number;
+  igst?: number;
   originalAmount: number;
   creditedAmount: number;
   receiptApplied: number;
@@ -360,6 +388,14 @@ export interface InventoryAdjustment {
   reason: string;
   authorizedBy: string;
   hasDocumentation: boolean;
+}
+
+export interface BankStatementLine {
+  id: string;
+  date: string;
+  description: string;
+  amount: number;
+  matchedReceiptId: string | null;
 }
 
 export interface NotificationItem {

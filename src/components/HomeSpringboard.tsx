@@ -189,7 +189,7 @@ export const HomeSpringboard: React.FC = () => {
         </h1>
 
         {/* Category Tabs */}
-        <div className="mt-6 flex items-center gap-6 overflow-x-auto border-b border-white/30 pb-2">
+        <div data-coach="springboard" className="mt-6 flex items-center gap-6 overflow-x-auto border-b border-white/30 pb-2">
           {SPRINGBOARD_TABS.map((tab) => {
             const active = activeSpringboardTab === tab;
             return (
@@ -258,7 +258,7 @@ export const HomeSpringboard: React.FC = () => {
         {/* Things to Finish / Live Infolets */}
         <div className="mt-10">
           <div className="text-[12px] font-semibold text-[#1D3549] mb-3">Things to Finish & Live ERP Summary</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div data-coach="things-to-finish" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => navigate('manage_requisitions')}
               className="bg-white/90 hover:bg-white rounded-[4px] p-4 text-left shadow-sm border border-white transition-all"
@@ -284,12 +284,12 @@ export const HomeSpringboard: React.FC = () => {
               <div className="text-[11px] text-[#00688C] mt-1">Validate & Pay Suppliers →</div>
             </button>
             <button
-              onClick={() => navigate('ca_audit_lab')}
+              onClick={() => navigate('accounts_receivable')}
               className="bg-white/90 hover:bg-white rounded-[4px] p-4 text-left shadow-sm border border-white transition-all"
             >
-              <div className="text-[11.5px] text-[#5E6C7A] font-medium">Open AR Invoices & Audit</div>
+              <div className="text-[11.5px] text-[#5E6C7A] font-medium">Open AR Invoices</div>
               <div className="text-[26px] font-light text-[#C74634] mt-1">{openAR}</div>
-              <div className="text-[11px] text-[#C74634] mt-1">Open CA Audit Lab →</div>
+              <div className="text-[11px] text-[#C74634] mt-1">Open customer bills →</div>
             </button>
           </div>
         </div>

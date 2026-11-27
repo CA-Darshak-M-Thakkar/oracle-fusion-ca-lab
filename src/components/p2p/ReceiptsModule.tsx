@@ -4,7 +4,7 @@ import { useERP } from '../../context/ERPContext';
 import { ModuleFrame } from '../ModuleFrame';
 
 export const ReceiptsModule: React.FC = () => {
-  const { currentRoute, selectedId, navigate, purchaseOrders, receipts, createReceipt } = useERP();
+  const { currentRoute, selectedId, navigate, purchaseOrders, receipts, createReceipt, showToast } = useERP();
   const [poFilter, setPoFilter] = useState('');
   const [selectedPoId, setSelectedPoId] = useState<string | null>(null);
   const [receiveQty, setReceiveQty] = useState(1);
@@ -29,6 +29,7 @@ export const ReceiptsModule: React.FC = () => {
                 createReceipt(po.id, receiveQty, waybill, packingSlip);
                 navigate('my_receipts');
               }}
+              data-coach="submit-receipt"
               className="oracle-btn-primary"
             >
               Submit
@@ -111,9 +112,30 @@ export const ReceiptsModule: React.FC = () => {
       caConceptTitle="CA Concept: Receiving & Physical Verification"
       caConceptBody="Once the vendor delivers goods, the receiving clerk searches by PO or Requisition number and records the exact quantity received."
       actions={
-        <button onClick={() => navigate('payables_invoices')} className="oracle-btn-secondary">
-          Go to Payables Invoices →
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            data-coach="quick-receive"
+            className="oracle-btn-primary"
+            onClick={() => {
+              const po = purchaseOrders.find(
+                (p) => p.status === 'Open' && !p.trainingCase && p.lines.some((l) => l.receivedQty < l.quantity)
+              );
+              if (!po) {
+                showToast('warning', 'No chair order yet', 'Approve your own purchase order first. Leave the paper order PO-10 alone.');
+                return;
+              }
+              const line = po.lines[0];
+              const qty = line.quantity - line.receivedQty;
+              createReceipt(po.id, qty, 'BD-CHAIRS', 'PS-CHAIRS');
+            }}
+          >
+            Receive the chairs
+          </button>
+          <button onClick={() => navigate('payables_invoices')} className="oracle-btn-secondary">
+            Go to Payables Invoices →
+          </button>
+        </div>
       }
     >
       <div className="space-y-5">

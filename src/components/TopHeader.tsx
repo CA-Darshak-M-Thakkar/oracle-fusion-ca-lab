@@ -141,6 +141,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
       {/* Left: Navigator + ORACLE wordmark */}
       <div className="flex items-center gap-3">
         <button
+          data-coach="navigator-btn"
           onClick={onOpenNavigator}
           title="Navigator"
           className="p-1.5 rounded hover:bg-white/15 transition-colors flex items-center gap-2"
@@ -158,9 +159,13 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
             type="text"
             value={searchQuery}
             onFocus={() => setSearchFocused(true)}
+            data-coach="global-search"
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setSearchFocused(true);
+              if (e.target.value.trim().length > 1) {
+                window.dispatchEvent(new CustomEvent('fusion-guide', { detail: 'search-used' }));
+              }
             }}
             placeholder="Search modules, PO#, Requisition#, Invoices, Reports..."
             className="w-full h-[30px] pl-8 pr-3 rounded-[3px] bg-white/95 text-[#161513] placeholder-[#6B7785] text-[12.5px] focus:outline-none focus:bg-white shadow-inner"
@@ -222,7 +227,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         {onSwitchToEBS && (
           <button
             onClick={onSwitchToEBS}
-            title="Switch to Classic Oracle EBS R12 Forms UI (from P2P PDF)"
+            title="Optional: older Oracle E-Business Suite R12 forms. The class labs are in Fusion."
             className="px-2.5 py-1 rounded text-[11.5px] font-medium flex items-center gap-1 bg-[#2D5F7E] border border-white/30 text-white hover:bg-[#1E445C] transition-colors mr-1 whitespace-nowrap shrink-0"
           >
             <span className="hidden md:inline">EBS R12 Classic UI</span>
@@ -236,19 +241,6 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         >
           <FolderDown className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Lab Pack &amp; Files</span>
-        </button>
-
-        <button
-          onClick={() => setTeachingMode(!teachingMode)}
-          title="Toggle CA Student Guided Walkthrough"
-          className={`px-2.5 py-1 rounded text-[11.5px] font-medium flex items-center gap-1.5 transition-colors mr-1 ${
-            teachingMode
-              ? 'bg-[#FFE082] text-[#312D2A] shadow-sm'
-              : 'bg-white/15 text-white hover:bg-white/25'
-          }`}
-        >
-          <GraduationCap className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">CA Guide {teachingMode ? 'ON' : 'OFF'}</span>
         </button>
 
         <button
@@ -390,7 +382,8 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         <div className="relative ml-1">
           <button
             onClick={() => setOpenDropdown(openDropdown === 'user' ? null : 'user')}
-            className="w-7 h-7 rounded-full bg-white text-[#00688C] font-bold text-[11px] flex items-center justify-center shadow-sm hover:ring-2 hover:ring-white/60 transition-all"
+            data-coach="user-menu"
+            className="w-9 h-9 rounded-full bg-white text-[#00688C] font-bold text-[11px] flex items-center justify-center shadow-sm hover:ring-2 hover:ring-white/60 transition-all"
             title={currentUser.name}
           >
             {currentUser.initials}
@@ -400,7 +393,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
               <div className="px-4 py-3 bg-[#F4F6F9] border-b border-[#D6DFE6]">
                 <div className="text-[13px] font-semibold">{currentUser.name}</div>
                 {currentUser.email && <div className="text-[11px] text-[#524C46] truncate">{currentUser.email}</div>}
-                {currentUser.wroNo && <div className="text-[11px] text-[#524C46]">WRO: {currentUser.wroNo}</div>}
+                {currentUser.isTeacher && <div className="text-[11px] text-[#92400E]">Teacher</div>}
                 <div className="text-[11.5px] text-[#00688C] font-medium mt-0.5">{currentUser.role}</div>
                 <div className="text-[11px] text-[#5E5852]">{currentUser.department}</div>
               </div>
@@ -416,6 +409,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
                       switchUser(u.id);
                       setOpenDropdown(null);
                     }}
+                    data-coach={`role-${u.roleId}`}
                     className={`w-full text-left px-2.5 py-1.5 rounded text-[12px] flex items-center justify-between ${
                       u.role === currentUser.role ? 'bg-[#EDF6FA] text-[#00688C] font-semibold' : 'hover:bg-[#F4F6F9]'
                     }`}

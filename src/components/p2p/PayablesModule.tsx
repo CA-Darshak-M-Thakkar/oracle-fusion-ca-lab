@@ -7,6 +7,7 @@ export const PayablesModule: React.FC = () => {
   const {
     currentRoute,
     navigate,
+    currentUser,
     suppliers,
     purchaseOrders,
     apInvoices,
@@ -15,20 +16,23 @@ export const PayablesModule: React.FC = () => {
     postAPInvoiceToLedger,
     apPayments,
     createAPPayment,
+    showToast,
   } = useERP();
 
   // Create AP Invoice State
-  const [invSupplier, setInvSupplier] = useState('MURALI TECHNOLOGIES');
-  const [invPoId, setInvPoId] = useState('11');
-  const [invAmount, setInvAmount] = useState(1000);
-  const [invDueDate, setInvDueDate] = useState('2026-12-22');
-  const [invDesc, setInvDesc] = useState('Matched vendor invoice');
+  const [invSupplier, setInvSupplier] = useState('Sharma Traders');
+  const [invPoId, setInvPoId] = useState('');
+  const [invAmount, setInvAmount] = useState(50000);
+  const [invQty, setInvQty] = useState(10);
+  const [invPrice, setInvPrice] = useState(5000);
+  const [invDueDate, setInvDueDate] = useState('');
+  const [invDesc, setInvDesc] = useState('10 office chairs');
 
   // Create Payment State (Pages 47-48)
-  const [paySupplier, setPaySupplier] = useState('MURALI TECHNOLOGIES');
-  const [disbBank, setDisbBank] = useState('ORCS_ORG_A/C');
-  const [payMethod, setPayMethod] = useState('10_CHECK');
-  const [payProfile, setPayProfile] = useState('001_HCL_PPR US PAYMENT SYSTEM');
+  const [paySupplier, setPaySupplier] = useState('Sharma Traders');
+  const [disbBank, setDisbBank] = useState('HDFC Bank — ABC Current Account');
+  const [payMethod, setPayMethod] = useState('NEFT');
+  const [payProfile, setPayProfile] = useState('ABC NEFT Profile');
   const [selectInvModalOpen, setSelectInvModalOpen] = useState(false);
   const [invSearchQuery, setInvSearchQuery] = useState('');
   const [selectedPayInvIds, setSelectedPayInvIds] = useState<string[]>([]);
@@ -53,7 +57,9 @@ export const PayablesModule: React.FC = () => {
             createAPInvoice({
               supplier: invSupplier,
               poId: invPoId || undefined,
-              amount: invAmount,
+              amount: invQty * invPrice,
+              quantity: invQty,
+              unitPrice: invPrice,
               description: invDesc,
               dueDate: invDueDate,
             });
@@ -64,7 +70,7 @@ export const PayablesModule: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12.5px]">
             <div>
               <label className="block font-medium mb-1">Business Unit</label>
-              <input readOnly value="US1 Business Unit" className="w-full oracle-input bg-[#F4F6F9]" />
+              <input readOnly value="ABC Mumbai Business Unit" className="w-full oracle-input bg-[#F4F6F9]" />
             </div>
             <div>
               <label className="block font-medium mb-1">* Identifying PO (for 3-Way Match)</label>
@@ -75,8 +81,11 @@ export const PayablesModule: React.FC = () => {
                   setInvPoId(e.target.value);
                   if (po) {
                     setInvSupplier(po.supplier);
-                    setInvAmount(po.totalAmount);
-                    setInvDesc(`Invoice for PO ${po.id} — ${po.description}`);
+                    const openQty = Math.max(po.lines[0].receivedQty - po.lines[0].invoicedQty, 0);
+                    setInvQty(openQty || po.lines[0].quantity);
+                    setInvPrice(po.lines[0].price);
+                    setInvAmount((openQty || po.lines[0].quantity) * po.lines[0].price);
+                    setInvDesc(`Invoice for ${po.description}`);
                   }
                 }}
                 className="w-full oracle-select"
@@ -98,15 +107,16 @@ export const PayablesModule: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block font-medium mb-1">* Amount (INR)</label>
-              <input
-                type="number"
-                step="0.01"
-                value={invAmount}
-                onChange={(e) => setInvAmount(Number(e.target.value))}
-                required
-                className="w-full oracle-input"
-              />
+              <label className="block font-medium mb-1">* Quantity</label>
+              <input type="number" min={1} value={invQty} onChange={(e) => setInvQty(Number(e.target.value))} required className="w-full oracle-input" />
+            </div>
+            <div>
+              <label className="block font-medium mb-1">* Price each (INR)</label>
+              <input type="number" min={1} value={invPrice} onChange={(e) => setInvPrice(Number(e.target.value))} required className="w-full oracle-input" />
+            </div>
+            <div>
+              <label className="block font-medium mb-1">Taxable amount</label>
+              <input readOnly value={invQty * invPrice} className="w-full oracle-input bg-[#F4F6F9]" />
             </div>
             <div>
               <label className="block font-medium mb-1">Due Date</label>
@@ -129,8 +139,8 @@ export const PayablesModule: React.FC = () => {
           </div>
 
           <div className="mt-6 flex justify-end gap-2">
-            <button type="submit" className="oracle-btn-primary">
-              Save & Run 3-Way Match
+            <button type="submit" data-coach="save-invoice" className="oracle-btn-primary">
+              Save and run 3-way match
             </button>
           </div>
         </form>
@@ -404,12 +414,57 @@ export const PayablesModule: React.FC = () => {
       caConceptTitle="CA Concept: Accounts Payable Invoices & 3-Way Match"
       caConceptBody="Inspect all supplier invoices. Notice how Oracle Fusion flags 'Qty Variance' or 'Unmatched (No PO)' — these are key Red Flags for CA Auditors!"
       actions={
-        <div className="flex gap-2">
-          <button onClick={() => navigate('create_ap_invoice')} className="oracle-btn-primary">
-            <Plus className="w-3.5 h-3.5" /> Create Invoice
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            data-coach="quick-match-invoice"
+            className="oracle-btn-primary"
+            onClick={() => {
+              const po = purchaseOrders.find((p) => !p.trainingCase && p.lines.some((l) => l.receivedQty > l.invoicedQty));
+              if (!po) {
+                showToast('warning', 'Receive the chairs first', 'There is no received quantity waiting for a bill.');
+                return;
+              }
+              const line = po.lines[0];
+              const qty = line.receivedQty - line.invoicedQty;
+              createAPInvoice({
+                supplier: po.supplier,
+                poId: po.id,
+                amount: qty * line.price,
+                quantity: qty,
+                unitPrice: line.price,
+                description: `${qty} ${line.description}`,
+                dueDate: '',
+              });
+            }}
+          >
+            Create the matching bill
           </button>
-          <button onClick={() => navigate('create_ap_payment')} className="oracle-btn-secondary">
-            Pay Invoices →
+          <button
+            type="button"
+            data-coach="quick-pay"
+            className="oracle-btn-primary"
+            onClick={() => {
+              const inv = apInvoices.find(
+                (i) => i.createdBy === currentUser.name && i.matchStatus === 'Matched (3-Way)' && i.unpaidAmount > 0 && i.status !== 'On Hold'
+              );
+              if (!inv) {
+                showToast('warning', 'No matched bill of yours', 'Create the matching chair bill first, as the AP Accountant.');
+                return;
+              }
+              createAPPayment({
+                supplier: inv.supplier,
+                disbursementBank: 'HDFC Bank — ABC Current Account',
+                paymentMethod: 'NEFT',
+                paymentProcessProfile: 'ABC NEFT Profile',
+                invoiceIds: [inv.id],
+              });
+            }}
+          >
+            Pay the matched bill
+          </button>
+          <button onClick={() => navigate('create_ap_invoice')} className="oracle-btn-secondary">
+            <Plus className="w-3.5 h-3.5" /> Create Invoice
           </button>
         </div>
       }

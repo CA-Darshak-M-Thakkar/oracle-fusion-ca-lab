@@ -6,12 +6,12 @@ import { ModuleFrame } from '../ModuleFrame';
 export const OrderManagementModule: React.FC = () => {
   const { currentRoute, navigate, customers, items, salesOrders, createSalesOrder, submitSalesOrder } = useERP();
 
-  const [customerName, setCustomerName] = useState('NASA PVT LTD');
-  const [orderType, setOrderType] = useState('EXA BILL SHIP');
+  const [customerName, setCustomerName] = useState('Mehta Stores');
+  const [orderType, setOrderType] = useState('Standard');
   const [paymentTerms, setPaymentTerms] = useState('Immediate');
-  const [selectedItemCode, setSelectedItemCode] = useState('NYLON THREAD');
-  const [quantity, setQuantity] = useState(10);
-  const [unitPrice, setUnitPrice] = useState(120);
+  const [selectedItemCode, setSelectedItemCode] = useState('Laptop');
+  const [quantity, setQuantity] = useState(2);
+  const [unitPrice, setUnitPrice] = useState(50000);
   const [itemModalOpen, setItemModalOpen] = useState(false);
   const [itemQuery, setItemQuery] = useState('');
 
@@ -44,6 +44,7 @@ export const OrderManagementModule: React.FC = () => {
                 }
                 navigate('order_management');
               }}
+              data-coach="submit-sales-order"
               className="oracle-btn-primary"
             >
               Submit
@@ -76,8 +77,7 @@ export const OrderManagementModule: React.FC = () => {
               <div className="grid grid-cols-3 items-center gap-2">
                 <label className="text-right font-medium">Order Type</label>
                 <select value={orderType} onChange={(e) => setOrderType(e.target.value)} className="col-span-2 oracle-select">
-                  <option value="EXA BILL SHIP">EXA BILL SHIP</option>
-                  <option value="Standard Sales Order">Standard Sales Order</option>
+                  <option value="Standard">Standard</option>
                 </select>
               </div>
               <div className="grid grid-cols-3 items-center gap-2">

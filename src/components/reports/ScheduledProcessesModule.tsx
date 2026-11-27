@@ -1,14 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { CalendarClock, Download, Printer, Plus, CheckCircle2, X, Eye } from 'lucide-react';
 import { useERP } from '../../context/ERPContext';
 import { ModuleFrame } from '../ModuleFrame';
 import { ScheduledJob } from '../../types/erp';
+import { COMPANY, daysPastDue, inr, supplierBucket, trialBalanceTotals } from '../../data/company';
+import { emitGuide } from '../../guide/events';
 
 export const ScheduledProcessesModule: React.FC = () => {
   const { scheduledJobs, scheduleNewProcess, glAccounts, apInvoices, arTransactions } = useERP();
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedReportType, setSelectedReportType] = useState<ScheduledJob['reportType']>('TrialBalance');
-  const [viewingJob, setViewingJob] = useState<ScheduledJob | null>(scheduledJobs[0] ?? null);
+  const [viewingJob, setViewingJob] = useState<ScheduledJob | null>(null);
+
+  useEffect(() => {
+    if (viewingJob?.reportType === 'TrialBalance') emitGuide('tb-viewed');
+    if (viewingJob?.reportType === 'SupplierAging' || viewingJob?.reportType === 'PayablesAging') emitGuide('aging-viewed');
+  }, [viewingJob]);
 
   const exportCSV = (filename: string, rows: string[][]) => {
     const csv = rows.map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -70,6 +77,7 @@ export const ScheduledProcessesModule: React.FC = () => {
                     <td className="p-2.5">{job.submissionTime}</td>
                     <td className="p-2.5">
                       <button
+                        data-coach={job.reportType === 'TrialBalance' ? 'view-trial-balance' : job.reportType === 'SupplierAging' ? 'view-supplier-aging' : undefined}
                         onClick={() => setViewingJob(job)}
                         className="text-[#00688C] hover:underline font-medium inline-flex items-center gap-1"
                       >
@@ -145,8 +153,18 @@ export const ScheduledProcessesModule: React.FC = () => {
             {viewingJob.reportType === 'TrialBalance' && (
               <div>
                 <div className="text-[12px] text-[#5E6C7A] mb-3">
-                  Ledger: <strong>US_Primary_Ledger</strong> | Company_Segment: <strong>01 Deepak Retail Company</strong>
+                  Ledger: <strong>{COMPANY.ledger}</strong> | Company: <strong>{COMPANY.legalEntity}</strong> | GSTIN {COMPANY.gstin}
                 </div>
+                {(() => {
+                  const totals = trialBalanceTotals(glAccounts);
+                  return (
+                    <p className={`mb-3 text-lg font-semibold ${totals.balanced ? 'text-emerald-700' : 'text-rose-700'}`}>
+                      {totals.balanced
+                        ? `Books balance. Debit total ₹${inr(totals.endDr)} equals credit total ₹${inr(totals.endCr)}.`
+                        : `Out of balance. Debits ₹${inr(totals.endDr)} Credits ₹${inr(totals.endCr)}.`}
+                    </p>
+                  );
+                })()}
                 <table className="w-full text-[12px] border border-[#BCC6D0]">
                   <thead className="bg-[#D9E2EC]">
                     <tr>
@@ -173,6 +191,20 @@ export const ScheduledProcessesModule: React.FC = () => {
                       );
                     })}
                   </tbody>
+                  <tfoot>
+                    {(() => {
+                      const totals = trialBalanceTotals(glAccounts);
+                      return (
+                        <tr className="font-semibold bg-slate-100">
+                          <td className="p-2 border" colSpan={2}>Totals (Dr and Cr)</td>
+                          <td className="p-2 border text-right">Dr {inr(totals.openingDr)} / Cr {inr(totals.openingCr)}</td>
+                          <td className="p-2 border text-right">{inr(totals.periodDr)}</td>
+                          <td className="p-2 border text-right">{inr(totals.periodCr)}</td>
+                          <td className="p-2 border text-right">Dr {inr(totals.endDr)} / Cr {inr(totals.endCr)}</td>
+                        </tr>
+                      );
+                    })()}
+                  </tfoot>
                 </table>
               </div>
             )}
@@ -181,36 +213,41 @@ export const ScheduledProcessesModule: React.FC = () => {
             {(viewingJob.reportType === 'SupplierAging' || viewingJob.reportType === 'PayablesAging') && (
               <div>
                 <div className="text-[12px] text-[#5E6C7A] mb-3">
-                  Vision Operations (USA) — Unpaid Supplier Balances by Aging Bucket
+                  {COMPANY.legalEntity} — unpaid supplier bills. Buckets from the due date: 0–30, 30–60, 60–90, 90+ days (Unit 4, page 49).
                 </div>
                 <table className="w-full text-[12px] border border-[#BCC6D0]">
                   <thead className="bg-[#B8D4E8]">
                     <tr>
                       <th className="p-2 border text-left">Supplier</th>
-                      <th className="p-2 border text-left">Invoice Number</th>
-                      <th className="p-2 border text-right">Invoice Amount</th>
-                      <th className="p-2 border text-right">Unpaid Amount</th>
-                      <th className="p-2 border text-right">Future</th>
-                      <th className="p-2 border text-right">1 week Overdue</th>
-                      <th className="p-2 border text-right">2 weeks Overdue</th>
-                      <th className="p-2 border text-right">3+ weeks Overdue</th>
+                      <th className="p-2 border text-left">Invoice</th>
+                      <th className="p-2 border text-left">Due</th>
+                      <th className="p-2 border text-right">Unpaid</th>
+                      <th className="p-2 border text-right">0–30</th>
+                      <th className="p-2 border text-right">30–60</th>
+                      <th className="p-2 border text-right">60–90</th>
+                      <th className="p-2 border text-right">90+</th>
                     </tr>
                   </thead>
                   <tbody>
                     {apInvoices
                       .filter((i) => i.unpaidAmount > 0)
-                      .map((inv) => (
-                        <tr key={inv.id}>
-                          <td className="p-2 border font-medium">{inv.supplier}</td>
-                          <td className="p-2 border">{inv.id}</td>
-                          <td className="p-2 border text-right">{inv.amount.toFixed(2)}</td>
-                          <td className="p-2 border text-right font-semibold">{inv.unpaidAmount.toFixed(2)}</td>
-                          <td className="p-2 border text-right">{inv.daysOverdue === 0 ? inv.unpaidAmount.toFixed(2) : '0.00'}</td>
-                          <td className="p-2 border text-right">{inv.daysOverdue > 0 && inv.daysOverdue <= 7 ? inv.unpaidAmount.toFixed(2) : '0.00'}</td>
-                          <td className="p-2 border text-right">{inv.daysOverdue > 7 && inv.daysOverdue <= 14 ? inv.unpaidAmount.toFixed(2) : '0.00'}</td>
-                          <td className="p-2 border text-right">{inv.daysOverdue > 14 ? inv.unpaidAmount.toFixed(2) : '0.00'}</td>
-                        </tr>
-                      ))}
+                      .map((inv) => {
+                        const days = daysPastDue(inv.dueDate);
+                        const bucket = supplierBucket(days);
+                        const cell = (name: string) => (bucket === name ? inv.unpaidAmount.toFixed(2) : '0.00');
+                        return (
+                          <tr key={inv.id}>
+                            <td className="p-2 border font-medium">{inv.supplier}</td>
+                            <td className="p-2 border">{inv.id}</td>
+                            <td className="p-2 border">{inv.dueDate} ({days} days)</td>
+                            <td className="p-2 border text-right font-semibold">{inv.unpaidAmount.toFixed(2)}</td>
+                            <td className="p-2 border text-right">{cell('0-30')}</td>
+                            <td className="p-2 border text-right">{cell('30-60')}</td>
+                            <td className="p-2 border text-right">{cell('60-90')}</td>
+                            <td className="p-2 border text-right">{cell('90+')}</td>
+                          </tr>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
@@ -220,7 +257,7 @@ export const ScheduledProcessesModule: React.FC = () => {
             {viewingJob.reportType === 'ARAging' && (
               <div>
                 <div className="text-[12px] text-[#5E6C7A] mb-3">
-                  Vision Operations (USA) — Customer Receivables Aging - 4 Bucket Report
+                  {COMPANY.legalEntity} — customer dues from the due date (payment terms), not from the invoice date. Unapplied receipts are not in this list.
                 </div>
                 <table className="w-full text-[12px] border border-[#BCC6D0]">
                   <thead className="bg-[#D9E2EC]">
@@ -237,17 +274,20 @@ export const ScheduledProcessesModule: React.FC = () => {
                   <tbody>
                     {arTransactions
                       .filter((t) => t.balanceDue > 0)
-                      .map((tx) => (
+                      .map((tx) => {
+                        const days = daysPastDue(tx.dueDate);
+                        return (
                         <tr key={tx.id}>
                           <td className="p-2 border font-medium">{tx.customer}</td>
-                          <td className="p-2 border">{tx.customerNumber}</td>
+                          <td className="p-2 border">{tx.customerNumber} · due {tx.dueDate}</td>
                           <td className="p-2 border text-right font-semibold">{tx.balanceDue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
-                          <td className="p-2 border text-right">{tx.daysPastDue === 0 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
-                          <td className="p-2 border text-right">{tx.daysPastDue >= 1 && tx.daysPastDue <= 30 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
-                          <td className="p-2 border text-right">{tx.daysPastDue >= 31 && tx.daysPastDue <= 60 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
-                          <td className="p-2 border text-right text-[#C74634] font-semibold">{tx.daysPastDue >= 61 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
+                          <td className="p-2 border text-right">{days === 0 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
+                          <td className="p-2 border text-right">{days >= 1 && days <= 30 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
+                          <td className="p-2 border text-right">{days >= 31 && days <= 60 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
+                          <td className="p-2 border text-right text-[#C74634] font-semibold">{days >= 61 ? tx.balanceDue.toFixed(2) : '0.00'}</td>
                         </tr>
-                      ))}
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>

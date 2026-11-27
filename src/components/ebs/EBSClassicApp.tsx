@@ -109,7 +109,7 @@ export const EBSClassicApp: React.FC<EBSClassicAppProps> = ({ onSwitchToFusion }
       <div className="bg-[#2D5F7E] text-white px-3 py-1.5 flex items-center justify-between border-b border-[#1D4056] text-[12px]">
         <div className="flex items-center gap-3">
           <span className="font-bold tracking-wide text-[#FFE082]">ORACLE</span>
-          <span>E-Business Suite R12 — Vision Operations (USA) [Classic Forms UI]</span>
+          <span>Older product: E-Business Suite R12 forms. Optional comparison only. Class labs are in Fusion Cloud.</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-[#CDE2EF]">User: {currentUser.name}</span>
@@ -620,8 +620,8 @@ export const EBSClassicApp: React.FC<EBSClassicAppProps> = ({ onSwitchToFusion }
                         onClick={() => {
                           const po = purchaseOrders.find((p) => p.id === invPoId);
                           if (po) {
-                            const inv = createAPInvoice({ supplier: po.supplier, poId: po.id, amount: po.totalAmount, description: `Matched to PO ${po.id}`, dueDate: '2026-12-22' });
-                            setActiveInvId(inv.id);
+                            const inv = createAPInvoice({ supplier: po.supplier, poId: po.id, amount: po.lines[0]?.price ?? po.totalAmount, quantity: po.lines[0]?.receivedQty || po.lines[0]?.quantity, unitPrice: po.lines[0]?.price, description: `Matched to PO ${po.id}`, dueDate: '2026-12-22' });
+                            if (inv) setActiveInvId(inv.id);
                           }
                           setMatchModal(false);
                         }}

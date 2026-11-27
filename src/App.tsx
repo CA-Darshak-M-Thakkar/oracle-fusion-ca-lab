@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ERPProvider, useERP } from './context/ERPContext';
 import { LoginScreen } from './components/LoginScreen';
 import { TopHeader } from './components/TopHeader';
 import { NavigatorDrawer } from './components/NavigatorDrawer';
 import { HomeSpringboard } from './components/HomeSpringboard';
-import { CATeachingBar } from './components/CATeachingBar';
-import { ProcessFlowMap } from './components/ProcessFlowMap';
 import { RequisitionsModule } from './components/p2p/RequisitionsModule';
 import { PurchaseOrdersModule } from './components/p2p/PurchaseOrdersModule';
 import { ReceiptsModule } from './components/p2p/ReceiptsModule';
@@ -13,32 +11,43 @@ import { PayablesModule } from './components/p2p/PayablesModule';
 import { OrderManagementModule } from './components/o2c/OrderManagementModule';
 import { InventoryShippingModule } from './components/o2c/InventoryShippingModule';
 import { ReceivablesModule } from './components/o2c/ReceivablesModule';
+import { BankReconciliationModule } from './components/o2c/BankReconciliationModule';
 import { GeneralAccountingModule } from './components/gl/GeneralAccountingModule';
 import { ScheduledProcessesModule } from './components/reports/ScheduledProcessesModule';
 import { AuditModule } from './components/audit/AuditModule';
 import { EBSClassicApp } from './components/ebs/EBSClassicApp';
+import { OrientationModule } from './components/orientation/OrientationModule';
+import { GuideProvider } from './components/guide/GuideLayer';
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
+
+const FONT_KEY = 'oracle_fusion_font';
+const THEME_KEY = 'oracle_fusion_theme';
+
+function applyPrefs(dark: boolean, font: string) {
+  const root = document.documentElement;
+  root.classList.toggle('dark-theme', dark);
+  root.classList.toggle('light-theme', !dark);
+  root.setAttribute('data-font', font);
+  localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light');
+  localStorage.setItem(FONT_KEY, font);
+}
 
 const ToastContainer: React.FC = () => {
   const { toasts, dismissToast } = useERP();
   if (toasts.length === 0) return null;
-
   return (
-    <div className="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full no-print">
+    <div className="fixed bottom-24 right-4 z-[75] w-full max-w-sm space-y-2">
       {toasts.map((t) => (
-        <div
-          key={t.id}
-          className="bg-white border border-[#D6DFE6] shadow-lg rounded-[4px] p-3.5 flex items-start gap-2.5 animate-in fade-in duration-150"
-        >
-          {t.type === 'success' && <CheckCircle2 className="w-4 h-4 text-[#2E7D32] shrink-0 mt-0.5" />}
-          {t.type === 'warning' && <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />}
-          {t.type === 'info' && <Info className="w-4 h-4 text-[#00688C] shrink-0 mt-0.5" />}
-          <div className="flex-1 text-[12px]">
-            <div className="font-semibold text-[#161513]">{t.title}</div>
-            <div className="text-[#524C46] mt-0.5">{t.message}</div>
+        <div key={t.id} className="flex items-start gap-2 rounded border border-slate-500 bg-slate-900 p-3 text-slate-50 shadow-lg">
+          {t.type === 'success' && <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-400" />}
+          {t.type === 'warning' && <AlertTriangle className="mt-1 h-5 w-5 text-amber-300" />}
+          {t.type === 'info' && <Info className="mt-1 h-5 w-5 text-sky-300" />}
+          <div className="flex-1 text-base">
+            <div className="font-semibold">{t.title}</div>
+            <div className="mt-1 leading-snug">{t.message}</div>
           </div>
-          <button onClick={() => dismissToast(t.id)} className="text-[#8C847C] hover:text-[#161513]">
-            <X className="w-3.5 h-3.5" />
+          <button type="button" onClick={() => dismissToast(t.id)} aria-label="Close">
+            <X className="h-5 w-5" />
           </button>
         </div>
       ))}
@@ -46,29 +55,20 @@ const ToastContainer: React.FC = () => {
   );
 };
 
-const MainRouter: React.FC = () => {
+const MainRouter: React.FC<{
+  fontScale: string;
+  onFont: (v: string) => void;
+  dark: boolean;
+  onToggleTheme: () => void;
+}> = ({ fontScale, onFont, dark, onToggleTheme }) => {
   const { isSignedIn, currentRoute } = useERP();
   const [navOpen, setNavOpen] = useState(false);
   const [uiMode, setUiMode] = useState<'fusion' | 'ebs'>('fusion');
-  const [processMapOpen, setProcessMapOpen] = useState(true);
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    return localStorage.getItem('oracle_fusion_dark_mode') === 'true';
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (darkMode) {
-      root.classList.add('dark-theme');
-    } else {
-      root.classList.remove('dark-theme');
-    }
-    localStorage.setItem('oracle_fusion_dark_mode', String(darkMode));
-  }, [darkMode]);
 
   if (!isSignedIn) {
     return (
       <>
-        <LoginScreen />
+        <LoginScreen fontScale={fontScale} onFont={onFont} dark={dark} onToggleTheme={onToggleTheme} />
         <ToastContainer />
       </>
     );
@@ -85,6 +85,8 @@ const MainRouter: React.FC = () => {
 
   const renderModule = () => {
     switch (currentRoute) {
+      case 'orientation':
+        return <OrientationModule />;
       case 'home':
         return <HomeSpringboard />;
       case 'purchase_requisitions':
@@ -118,6 +120,8 @@ const MainRouter: React.FC = () => {
       case 'accounts_receivable':
       case 'create_ar_receipt':
         return <ReceivablesModule />;
+      case 'bank_reconciliation':
+        return <BankReconciliationModule />;
       case 'general_accounting':
       case 'detail_balances':
       case 'journals':
@@ -133,17 +137,18 @@ const MainRouter: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="flex min-h-screen flex-col pb-24">
       <TopHeader
-        onOpenNavigator={() => setNavOpen(true)}
+        onOpenNavigator={() => {
+          setNavOpen(true);
+          window.dispatchEvent(new CustomEvent('fusion-guide', { detail: 'navigator-opened' }));
+        }}
         onSwitchToEBS={() => setUiMode('ebs')}
-        processMapOpen={processMapOpen}
-        onToggleProcessMap={() => setProcessMapOpen(!processMapOpen)}
-        darkMode={darkMode}
-        onToggleDarkMode={() => setDarkMode(!darkMode)}
+        processMapOpen={false}
+        onToggleProcessMap={() => undefined}
+        darkMode={dark}
+        onToggleDarkMode={onToggleTheme}
       />
-      <ProcessFlowMap open={processMapOpen} onClose={() => setProcessMapOpen(false)} />
-      <CATeachingBar />
       <NavigatorDrawer open={navOpen} onClose={() => setNavOpen(false)} />
       <main className="flex-1">{renderModule()}</main>
       <ToastContainer />
@@ -152,9 +157,23 @@ const MainRouter: React.FC = () => {
 };
 
 export function App() {
+  const [dark, setDark] = useState(() => localStorage.getItem(THEME_KEY) !== 'light');
+  const [fontScale, setFontScale] = useState(() => localStorage.getItem(FONT_KEY) || '125');
+
+  useEffect(() => {
+    applyPrefs(dark, fontScale);
+  }, [dark, fontScale]);
+
   return (
     <ERPProvider>
-      <MainRouter />
+      <GuideProvider>
+        <MainRouter
+          fontScale={fontScale}
+          onFont={setFontScale}
+          dark={dark}
+          onToggleTheme={() => setDark((v) => !v)}
+        />
+      </GuideProvider>
     </ERPProvider>
   );
 }

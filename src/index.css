@@ -3,12 +3,44 @@
 @tailwind utilities;
 
 @layer base {
+  html { font-size: 18px; }
+  html[data-font="100"] { font-size: 18px; }
+  html[data-font="125"] { font-size: 22px; }
+  html[data-font="150"] { font-size: 26px; }
   body {
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     color: #161513;
     background-color: #F4F6F9;
+    font-size: 1rem;
+    line-height: 1.45;
   }
 }
+
+/* Classroom default: nothing smaller than body text. */
+.text-\[10px\], .text-\[10\.5px\], .text-\[11px\], .text-\[11\.5px\],
+.text-\[12px\], .text-\[12\.5px\] {
+  font-size: 1rem !important;
+  line-height: 1.4 !important;
+}
+.text-\[13px\], .text-\[13\.5px\] { font-size: 1.05rem !important; }
+
+.login-screen { background: #0b1120; color: #f8fafc; }
+.login-card { background: #111827; border-color: #334155; color: #f8fafc; }
+html.light-theme .login-screen { background: #f4f6f9; color: #161513; }
+html.light-theme .login-card { background: #ffffff; border-color: #d6dfe6; color: #161513; }
+html.light-theme .login-card input { background: #fff; color: #161513; }
+
+.coach-ring {
+  border: 3px solid #fbbf24;
+  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.35), 0 0 0 9999px rgba(2, 6, 23, 0.55);
+  animation: coachpulse 1.4s ease-out infinite;
+}
+@keyframes coachpulse {
+  0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.8), 0 0 0 9999px rgba(2, 6, 23, 0.55); }
+  100% { box-shadow: 0 0 0 14px rgba(251, 191, 36, 0), 0 0 0 9999px rgba(2, 6, 23, 0.55); }
+}
+
+html.dark-theme header.oracle-header-gradient { min-height: 64px; height: auto; }
 
 /* Oracle Fusion Sky & Redwood subtle scrollbars */
 ::-webkit-scrollbar {

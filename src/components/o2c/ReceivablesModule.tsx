@@ -14,6 +14,7 @@ export const ReceivablesModule: React.FC = () => {
     createCreditMemo,
     arReceipts,
     createARReceipt,
+    showToast,
   } = useERP();
 
   const [actionsOpen, setActionsOpen] = useState(false);
@@ -23,10 +24,10 @@ export const ReceivablesModule: React.FC = () => {
   const [creditReason, setCreditReason] = useState('Damaged goods allowance');
 
   // Create Receipt State (Page 69)
-  const [rcptCustomer, setRcptCustomer] = useState('NASA PVT LTD');
-  const [rcptMethod, setRcptMethod] = useState('EFT / Wire');
-  const [rcptAmount, setRcptAmount] = useState(1500);
-  const [applyTxId, setApplyTxId] = useState('2050108');
+  const [rcptCustomer, setRcptCustomer] = useState('Mehta Stores');
+  const [rcptMethod, setRcptMethod] = useState('NEFT');
+  const [rcptAmount, setRcptAmount] = useState(118000);
+  const [applyTxId, setApplyTxId] = useState('');
 
   // Review Transaction (Page 68)
   if (currentRoute === 'review_ar_transaction') {
@@ -319,9 +320,32 @@ export const ReceivablesModule: React.FC = () => {
         caConceptTitle="CA Concept: Accounts Receivable & Unapplied Receipts"
         caConceptBody="Tracks customer payments received. Unapplied receipts or old open balances require investigation during cash & receivables reconciliation."
         actions={
-          <button onClick={() => navigate('create_ar_receipt')} className="oracle-btn-primary">
-            <CreditCard className="w-3.5 h-3.5" /> Create Receipt
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              data-coach="quick-apply-receipt"
+              className="oracle-btn-primary"
+              onClick={() => {
+                const mine = arTransactions.find((t) => t.balanceDue > 0 && t.salesOrderId);
+                const target = mine || arTransactions.find((t) => t.balanceDue > 0);
+                if (!target) {
+                  showToast('info', 'Nothing to collect', 'There is no open invoice.');
+                  return;
+                }
+                createARReceipt({
+                  customer: target.customer,
+                  receiptMethod: 'NEFT',
+                  amount: target.balanceDue,
+                  applyToInvoiceId: target.id,
+                });
+              }}
+            >
+              Apply receipt to my invoice
+            </button>
+            <button onClick={() => navigate('create_ar_receipt')} className="oracle-btn-secondary">
+              <CreditCard className="w-3.5 h-3.5" /> Create Receipt
+            </button>
+          </div>
         }
       >
         <div className="oracle-panel p-5">
@@ -346,7 +370,7 @@ export const ReceivablesModule: React.FC = () => {
               </thead>
               <tbody className="divide-y">
                 {arReceipts.map((r) => (
-                  <tr key={r.id}>
+                  <tr key={r.id} data-coach={r.status === 'Unapplied' ? 'unapplied-receipt' : undefined}>
                     <td className="p-2.5 font-semibold text-[#00688C]">{r.id}</td>
                     <td className="p-2.5">{r.customer}</td>
                     <td className="p-2.5">{r.receiptMethod}</td>
@@ -379,7 +403,7 @@ export const ReceivablesModule: React.FC = () => {
         </button>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-5" data-coach="ar-invoice-list">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="oracle-panel p-4">
             <div className="text-[12px] text-[#5E6C7A]">Open Invoices</div>
