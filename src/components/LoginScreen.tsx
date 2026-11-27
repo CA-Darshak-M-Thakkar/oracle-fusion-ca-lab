@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useERP } from '../context/ERPContext';
 import { GOOGLE_CLIENT_ID } from '../config/auth';
 import { e2eBypassEnabled } from '../config/e2e';
-import { AssistStyle } from '../guide/assist';
+import { AssistFeatures, AssistStyle } from '../guide/assist';
 import { ClassroomToolbar } from './ClassroomToolbar';
 
 function decodeJwt(token: string): { name?: string; email?: string; email_verified?: boolean } {
@@ -18,7 +18,10 @@ export const LoginScreen: React.FC<{
   onToggleTheme: () => void;
   assist: AssistStyle;
   onAssist: (value: AssistStyle) => void;
-}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist }) => {
+  features: AssistFeatures;
+  onFeatures: (value: AssistFeatures) => void;
+  voiceNotice?: string;
+}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist, features, onFeatures, voiceNotice }) => {
   const { signIn } = useERP();
   const btnRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState('');
@@ -92,6 +95,9 @@ export const LoginScreen: React.FC<{
             onToggleTheme={onToggleTheme}
             assist={assist}
             onAssist={onAssist}
+            features={features}
+            onFeatures={onFeatures}
+            voiceNotice={voiceNotice}
           />
         </div>
 

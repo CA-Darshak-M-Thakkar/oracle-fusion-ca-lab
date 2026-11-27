@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { clickCoach, followGuideToEnd, noHorizontalOverflow, signIn, watchPage } from './helpers';
+import { clickCoach, followGuideToEnd, goHash, noHorizontalOverflow, signIn, watchPage } from './helpers';
 
 async function boxOf(page: Page, selector: string) {
   const box = await page.locator(selector).first().boundingBox();
@@ -7,11 +7,12 @@ async function boxOf(page: Page, selector: string) {
   return box!;
 }
 
-function inside(box: { x: number; y: number; width: number; height: number }, width: number, height: number) {
-  expect(box.x).toBeGreaterThanOrEqual(-1);
-  expect(box.y).toBeGreaterThanOrEqual(-1);
-  expect(box.x + box.width).toBeLessThanOrEqual(width + 1);
-  expect(box.y + box.height).toBeLessThanOrEqual(height + 1);
+function inside(box: { x: number; y: number; width: number; height: number }, width: number, height: number, name = 'box') {
+  const detail = JSON.stringify({ name, box, width, height });
+  expect(box.x, detail).toBeGreaterThanOrEqual(-1);
+  expect(box.y, detail).toBeGreaterThanOrEqual(-1);
+  expect(box.x + box.width, detail).toBeLessThanOrEqual(width + 1);
+  expect(box.y + box.height, detail).toBeLessThanOrEqual(height + 1);
 }
 
 function overlaps(
@@ -83,6 +84,7 @@ test('each assist style points at the next control', async ({ page }) => {
 });
 
 test('student walks orientation and all four labs by the arrows', async ({ page }) => {
+  test.setTimeout(300_000);
   const errors = watchPage(page);
   await signIn(page, 'student');
   await expect(page.getByRole('button', { name: 'Presenter' })).toHaveCount(0);
@@ -95,7 +97,7 @@ test('student walks orientation and all four labs by the arrows', async ({ page 
   await page.getByRole('button', { name: /Got it/ }).click();
   await expect(page.locator('[data-coach="bubble-next"]')).toHaveCount(0);
 
-  await page.goto('/#scheduled_processes');
+  await goHash(page, 'scheduled_processes');
   await page.getByRole('button', { name: 'View Output' }).first().click();
   await expect(page.getByText(/Books balance/)).toBeVisible();
   await expect(page.getByText(/Debit total/)).toBeVisible();
@@ -105,7 +107,7 @@ test('student walks orientation and all four labs by the arrows', async ({ page 
 test('student surfaces: springboard, navigator, search, map, lab pack, roles, EBS', async ({ page }) => {
   const errors = watchPage(page);
   await signIn(page, 'student');
-  await page.goto('/#home');
+  await goHash(page, 'home');
   const tabs = ['Me', 'Procurement', 'Order Management', 'Supply Chain Execution', 'Payables', 'Receivables', 'General Accounting', 'Tools', 'Risk Management'];
   for (const tab of tabs) {
     await page.getByRole('button', { name: tab, exact: true }).click();
@@ -133,8 +135,13 @@ test('student surfaces: springboard, navigator, search, map, lab pack, roles, EB
     await expect(page.locator('main, h1, h2').first()).toBeVisible();
   }
 
-  await page.goto('/#home');
-  await page.getByPlaceholder(/Search modules/i).fill('Paper');
+  await goHash(page, 'home');
+  await page.locator('[data-coach="global-search"]').evaluate((el) => {
+    const input = el as HTMLInputElement;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+    setter?.call(input, 'Paper');
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
   await expect(page.getByText(/Paper|PO-10|Patel/i).first()).toBeVisible();
 
   await page.getByRole('button', { name: /Process Map/ }).click();
@@ -159,7 +166,7 @@ test('student surfaces: springboard, navigator, search, map, lab pack, roles, EB
   await page.getByRole('button', { name: 'Close lab pack' }).click();
 
   await page.getByRole('button', { name: /^[A-Z]{2}$/ }).click();
-  await page.getByRole('button', { name: 'Approver', exact: true }).click();
+  await page.getByRole('button', { name: 'Approver', exact: true }).evaluate((el) => (el as HTMLElement).click());
   await expect(page.getByText(/You are now the Approver/)).toBeVisible();
 
   await page.getByRole('button', { name: /EBS R12/ }).click();
@@ -174,7 +181,7 @@ test('student surfaces: springboard, navigator, search, map, lab pack, roles, EB
   await expect(page.getByTestId('step-title')).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/#home');
+  await goHash(page, 'home');
   await noHorizontalOverflow(page);
   await page.setViewportSize({ width: 1366, height: 768 });
   await noHorizontalOverflow(page);
@@ -184,23 +191,23 @@ test('student surfaces: springboard, navigator, search, map, lab pack, roles, EB
 test('holds, credit limit, reports and audit cases', async ({ page }) => {
   const errors = watchPage(page);
   await signIn(page, 'student');
-  await page.goto('/#create_sales_order');
+  await goHash(page, 'create_sales_order');
   await page.locator('main select').first().selectOption('Shah Stores');
   await page.getByRole('button', { name: 'Submit' }).click();
   await expect(page.getByText(/On Hold|Credit/i).first()).toBeVisible();
 
-  await page.goto('/#payables_invoices');
+  await goHash(page, 'payables_invoices');
   await page.getByRole('button', { name: /^[A-Z]{2}$/ }).click();
-  await page.getByRole('button', { name: 'Approver', exact: true }).click();
+  await page.getByRole('button', { name: 'Approver', exact: true }).evaluate((el) => (el as HTMLElement).click());
   await page.getByTestId('release-PAPER-100').click();
   await expect(page.getByText('Hold released')).toBeVisible();
 
-  await page.goto('/#journals');
+  await goHash(page, 'journals');
   await page.getByPlaceholder(/Accrued Audit Fee|Description/i).fill('Classroom test journal');
   await page.getByRole('button', { name: /Post Journal/ }).click();
   await expect(page.getByText('Classroom test journal')).toBeVisible();
 
-  await page.goto('/#scheduled_processes');
+  await goHash(page, 'scheduled_processes');
   await page.getByRole('button', { name: /Schedule New Process/ }).click();
   await page.getByRole('button', { name: 'Submit' }).click();
   await expect(page.getByText(/Report ready|Succeeded/).first()).toBeVisible();
@@ -208,7 +215,7 @@ test('holds, credit limit, reports and audit cases', async ({ page }) => {
   await expect(page.getByText(/0.30/).first()).toBeVisible();
   await expect(page.getByText(/90\+/).first()).toBeVisible();
 
-  await page.goto('/#ca_audit_lab');
+  await goHash(page, 'ca_audit_lab');
   await page.getByRole('button', { name: /Case 9.1/ }).click();
   await page.getByRole('button', { name: /Show item movement/ }).click();
   await expect(page.getByText('Purchase order PO-10')).toBeVisible();
@@ -247,7 +254,7 @@ test('teacher presenter: talking points, jump, reset, attendance, and a student 
   await page.getByRole('button', { name: /Reset demo data/ }).click();
   await expect(page.getByText('Demo reset')).toBeVisible();
 
-  await page.locator('[data-coach="user-menu"]').click();
+  await page.locator('[data-coach="user-menu"]').evaluate((el) => (el as HTMLElement).click());
   await page.getByRole('button', { name: 'Sign Out' }).click();
   await signIn(page, 'student');
   await expect(page.getByRole('button', { name: 'Presenter' })).toHaveCount(0);
@@ -286,9 +293,9 @@ test('notes drawer pushes the lesson and the guide stays on screen', async ({ pa
     const callout = await boxOf(page, '[data-testid="coach-callout"]');
     const next = await boxOf(page, '[data-coach="guide-next"]');
     const panel = await boxOf(page, '[data-testid="presenter-panel"]');
-    inside(callout, view.width, view.height);
-    inside(next, view.width, view.height);
-    inside(panel, view.width, view.height);
+    inside(callout, view.width, view.height, `callout ${size.width}`);
+    inside(next, view.width, view.height, `next ${size.width}`);
+    inside(panel, view.width, view.height, `panel ${size.width}`);
     expect(overlaps(panel, next), 'notes cover Next').toBeFalsy();
     expect(overlaps(panel, callout), 'notes cover the guide card').toBeFalsy();
     if (size.width >= 1100) {

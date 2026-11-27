@@ -1,5 +1,6 @@
 import React from 'react';
-import { ASSIST_STYLES, AssistStyle } from '../guide/assist';
+import { AssistFeatures, AssistStyle } from '../guide/assist';
+import { AssistControls } from './AssistControls';
 
 export const ClassroomToolbar: React.FC<{
   fontScale: string;
@@ -8,9 +9,12 @@ export const ClassroomToolbar: React.FC<{
   onToggleTheme: () => void;
   assist: AssistStyle;
   onAssist: (value: AssistStyle) => void;
+  features: AssistFeatures;
+  onFeatures: (value: AssistFeatures) => void;
   assistTestId?: string;
-}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist, assistTestId = 'assist-style' }) => (
-  <div data-testid="classroom-toolbar" className="flex flex-wrap items-center gap-2 text-base text-slate-100">
+  voiceNotice?: string;
+}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist, features, onFeatures, assistTestId = 'assist-style', voiceNotice }) => (
+  <div data-testid="classroom-toolbar" className="flex max-w-full flex-wrap items-center gap-2 text-base text-slate-100">
     <label>
       Text
       <select
@@ -27,20 +31,13 @@ export const ClassroomToolbar: React.FC<{
     <button type="button" data-testid="theme-toggle" className="rounded bg-slate-700 px-3 py-2 text-lg" onClick={onToggleTheme}>
       {dark ? 'Light theme' : 'Dark theme'}
     </button>
-    <label>
-      Assist
-      <select
-        data-testid={assistTestId}
-        className="ml-2 rounded bg-slate-800 px-2 py-2 text-lg text-slate-50"
-        value={assist}
-        onChange={(e) => onAssist(e.target.value as AssistStyle)}
-      >
-        {ASSIST_STYLES.map((style) => (
-          <option key={style.id} value={style.id}>
-            {style.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <AssistControls
+      assist={assist}
+      onAssist={onAssist}
+      features={features}
+      onFeatures={onFeatures}
+      assistTestId={assistTestId}
+      voiceNotice={voiceNotice}
+    />
   </div>
 );

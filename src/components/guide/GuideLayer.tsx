@@ -3,7 +3,8 @@ import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight, GraduationCap, RotateCcw, X } from 'lucide-react';
 import { useERP } from '../../context/ERPContext';
 import { LAB_META, STEPS, stepIndex } from '../../guide/curriculum';
-import { AssistStyle } from '../../guide/assist';
+import { AssistFeatures, AssistStyle } from '../../guide/assist';
+import { AssistExtras } from './AssistExtras';
 import { emitGuide } from '../../guide/events';
 import { formatHash, parseHash } from '../../guide/hash';
 import { ClassroomToolbar } from '../ClassroomToolbar';
@@ -56,7 +57,11 @@ export const GuideProvider: React.FC<{
   onToggleTheme: () => void;
   assist: AssistStyle;
   onAssist: (value: AssistStyle) => void;
-}> = ({ children, fontScale, onFont, dark, onToggleTheme, assist, onAssist }) => {
+  features: AssistFeatures;
+  onFeatures: (value: AssistFeatures) => void;
+  voiceNotice?: string;
+  onVoiceNotice: (text: string) => void;
+}> = ({ children, fontScale, onFont, dark, onToggleTheme, assist, onAssist, features, onFeatures, voiceNotice, onVoiceNotice }) => {
   const { isSignedIn, currentUser, navigate, currentRoute, selectedId, resetDemoData } = useERP();
   const [index, setIndex] = useState(() => stepIndex(parseHash()?.stepId));
   const [phase, setPhase] = useState<'act' | 'bubble'>('act');
@@ -64,6 +69,9 @@ export const GuideProvider: React.FC<{
   const [teacherOpen, setTeacherOpen] = useState(false);
   const [wide, setWide] = useState(true);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const [guideClicked, setGuideClicked] = useState(false);
+  const [ripple, setRipple] = useState<{ x: number; y: number; id: number } | null>(null);
+  const [wrongToast, setWrongToast] = useState(0);
   const [targetId, setTargetId] = useState<string | null>(null);
   const [calloutPos, setCalloutPos] = useState<{ top: number; left: number; maxWidth: number; maxHeight: number } | null>(null);
   const [stage, setStage] = useState({ left: 0, width: 0, top: 0, barTop: 0 });
@@ -122,6 +130,39 @@ export const GuideProvider: React.FC<{
   }, [index, currentUser.roleId, step.completeOn]);
 
   useEffect(() => {
+    setGuideClicked(false);
+  }, [index, targetId]);
+
+  useEffect(() => {
+    if (!wrongToast) return;
+    const timer = window.setTimeout(() => setWrongToast(0), 2200);
+    return () => window.clearTimeout(timer);
+  }, [wrongToast]);
+
+  useEffect(() => {
+    if (!isSignedIn || assist === 'off' || phase !== 'act') return;
+    const onPointer = (event: PointerEvent) => {
+      const node = event.target as Element | null;
+      if (!node || node.closest('[data-assist-ui]')) return;
+      const coach = targetId ? document.querySelector(`[data-coach="${targetId}"]`) : null;
+      const onTarget = !!(coach && (coach === node || coach.contains(node)));
+      if (onTarget) {
+        setGuideClicked(true);
+        if (features.feedback) setRipple({ x: event.clientX, y: event.clientY, id: Date.now() });
+        return;
+      }
+      if (!features.feedback) return;
+      const wrong = node.closest('button, a, input, select, textarea, [role="button"]');
+      if (!wrong || wrong.closest('[data-assist-ui]')) return;
+      wrong.classList.add('assist-shake');
+      window.setTimeout(() => wrong.classList.remove('assist-shake'), 450);
+      setWrongToast(Date.now());
+    };
+    document.addEventListener('pointerdown', onPointer, true);
+    return () => document.removeEventListener('pointerdown', onPointer, true);
+  }, [isSignedIn, assist, phase, targetId, features.feedback]);
+
+  useEffect(() => {
     if (!teacherOpen) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setPresenter(false);
@@ -142,8 +183,10 @@ export const GuideProvider: React.FC<{
         const lessonBottom = lessonRef.current?.getBoundingClientRect().bottom ?? 0;
         const barTop = bottomBarRef.current?.getBoundingClientRect().top ?? window.innerHeight;
         const r = el.getBoundingClientRect();
+        const inMenu = !!el.closest('header');
         const inView = r.top >= lessonBottom - 1 && r.bottom <= barTop - 1 && r.left >= 0 && r.right <= window.innerWidth;
-        if (!inView) el.scrollIntoView({ block: 'center', inline: 'nearest' });
+        if (!inView && inMenu) window.scrollTo({ top: 0, left: 0 });
+        else if (!inView) el.scrollIntoView({ block: 'center', inline: 'nearest' });
         setRect(el.getBoundingClientRect());
       }
 
@@ -169,7 +212,7 @@ export const GuideProvider: React.FC<{
         card.style.maxHeight = `${available}px`;
         const height = Math.max(card.offsetHeight, 110);
         const fittedHeight = Math.min(height, available);
-        const width = Math.min(Math.max(card.offsetWidth, 180), maxWidth);
+        let width = Math.min(Math.max(card.offsetWidth, 180), maxWidth);
         const targetInBar = !!target && target.bottom > barTop - 4;
         let left = boundsLeft;
         let top = Math.max(roomTop, barTop - margin - fittedHeight);
@@ -191,8 +234,19 @@ export const GuideProvider: React.FC<{
           const leftOfButton = target.left - margin - width;
           left = leftOfButton >= boundsLeft ? leftOfButton : boundsLeft;
         }
+        const panelBox = presenterRef.current?.getBoundingClientRect();
+        if (panelBox && panelBox.width > 2 && top < panelBox.bottom && top + fittedHeight > panelBox.top && left < panelBox.right) {
+          const beside = panelBox.right + margin;
+          if (beside + 140 <= boundsRight) {
+            left = beside;
+            width = Math.min(width, boundsRight - beside);
+          } else if (panelBox.top - margin - fittedHeight >= margin) {
+            top = panelBox.top - margin - fittedHeight;
+          }
+        }
         if (left + width > boundsRight) left = Math.max(boundsLeft, boundsRight - width);
-        if (top + fittedHeight > barTop - margin) top = Math.max(roomTop, barTop - margin - fittedHeight);
+        const limit = Math.min(barTop, window.innerHeight) - margin;
+        if (top + fittedHeight > limit) top = Math.max(margin, limit - fittedHeight);
         const nextCallout = { top, left, maxWidth: width, maxHeight: available };
         setCalloutPos((prev) => (sameBox(prev, nextCallout) ? prev : nextCallout));
       }
@@ -253,6 +307,9 @@ export const GuideProvider: React.FC<{
                 onToggleTheme={onToggleTheme}
                 assist={assist}
                 onAssist={onAssist}
+                features={features}
+                onFeatures={onFeatures}
+                voiceNotice={voiceNotice}
               />
               {isTeacher && (
                 <button
@@ -303,6 +360,21 @@ export const GuideProvider: React.FC<{
             <option value="off">Off</option>
           </select>
         </label>
+        <div data-assist-ui className="flex flex-col gap-2 text-base">
+          {([
+            ['longArrow', 'assist-opt-long-arrow', 'Long pointing arrow'],
+            ['hand', 'assist-opt-hand', 'Moving hand'],
+            ['feedback', 'assist-opt-feedback', 'Click feedback'],
+            ['dim', 'assist-opt-dim', 'Dim the rest'],
+            ['counter', 'assist-opt-counter', 'Step counter'],
+            ['magnifier', 'assist-opt-magnifier', 'Magnifier'],
+          ] as const).map(([key, id, label]) => (
+            <label key={id} className="inline-flex items-center gap-2">
+              <input data-testid={`teacher-${id}`} type="checkbox" checked={features[key]} onChange={(e) => onFeatures({ ...features, [key]: e.target.checked })} />
+              {label}
+            </label>
+          ))}
+        </div>
         <label className="flex items-center gap-2 text-lg">
           <input type="checkbox" checked={freeExplore} onChange={(e) => setFreeExplore(e.target.checked)} />
           Free explore — jump without moving the class screen
@@ -352,9 +424,10 @@ export const GuideProvider: React.FC<{
           {isTeacher && teacherOpen && !wide && (
             <aside
               ref={presenterRef}
+              data-assist-ui
               data-testid="presenter-panel"
               data-layout="flow"
-              className="relative z-[70] mx-3 mt-3 flex max-h-[34vh] flex-col overflow-hidden rounded-lg border border-amber-300 bg-slate-900 text-slate-50 shadow-xl"
+              className="fixed bottom-28 left-3 z-[70] flex max-h-[40vh] w-[min(16rem,46vw)] flex-col overflow-hidden rounded-lg border border-amber-300 bg-slate-900 text-slate-50 shadow-xl"
             >
               {notes}
             </aside>
@@ -364,9 +437,10 @@ export const GuideProvider: React.FC<{
         {isTeacher && teacherOpen && wide && (
           <aside
             ref={presenterRef}
+            data-assist-ui
             data-testid="presenter-panel"
             data-layout="push"
-            className="sticky top-0 z-[70] flex h-screen w-[min(26rem,38vw)] shrink-0 flex-col overflow-hidden border-l border-amber-300 bg-slate-900 text-slate-50"
+            className="sticky top-0 z-[70] flex h-dvh max-h-dvh w-[min(26rem,38vw)] shrink-0 flex-col overflow-hidden border-l border-amber-300 bg-slate-900 text-slate-50"
           >
             {notes}
           </aside>
@@ -445,10 +519,29 @@ export const GuideProvider: React.FC<{
           <p className="mt-1 text-lg leading-snug">{coachCopy}</p>
         </div>
       )}
-        </>,
-        document.body,
+      <AssistExtras
+        show={phase === 'act' && assist !== 'off'}
+        features={features}
+        rect={rect}
+        targetId={targetId}
+        stepIndex={index}
+        stepTotal={STEPS.length}
+        stepId={step.id}
+        plain={step.plain}
+        dismissed={guideClicked}
+        onVoiceNotice={onVoiceNotice}
+      />
+      {ripple && features.feedback && (
+        <>
+          <div key={`rip-${ripple.id}`} data-testid="assist-ripple" className="assist-ripple pointer-events-none fixed z-[120]" style={{ left: ripple.x, top: ripple.y }} />
+          <div key={`tick-${ripple.id}`} data-testid="assist-tick" className="assist-tick pointer-events-none fixed z-[121]" style={{ left: ripple.x, top: ripple.y }}>✓</div>
+        </>
       )}
-
+      {wrongToast > 0 && features.feedback && (
+        <div data-testid="assist-wrong-toast" className="pointer-events-none fixed left-1/2 top-24 z-[122] -translate-x-1/2 rounded-lg bg-amber-300 px-4 py-3 text-xl font-bold text-slate-950 shadow-2xl">
+          Not this one - look for the arrow
+        </div>
+      )}
       {phase === 'bubble' && (
         <div
           className="fixed bottom-0 top-0 z-[110] flex items-end justify-center bg-black/50 p-4 sm:items-center"
@@ -472,11 +565,10 @@ export const GuideProvider: React.FC<{
           </div>
         </div>
       )}
-
       <div
         ref={bottomBarRef}
         data-testid="guide-bar"
-        className="fixed bottom-0 z-40 flex items-center justify-between gap-3 border-t border-sky-700 bg-slate-950 px-4 py-3 text-slate-50"
+        className="fixed bottom-0 z-[80] flex items-center justify-between gap-3 border-t border-sky-700 bg-slate-950 px-4 py-3 text-slate-50"
         style={{ left: stage.width ? stage.left : 0, width: stage.width || '100%' }}
       >
         <button
@@ -504,6 +596,9 @@ export const GuideProvider: React.FC<{
           Next <ChevronRight className="h-6 w-6" />
         </button>
       </div>
+        </>,
+        document.body,
+      )}
     </GuideCtx.Provider>
   );
 };

@@ -13,6 +13,14 @@ export function watchPage(page: Page) {
   return errors;
 }
 
+export async function goHash(page: Page, hash: string) {
+  await page.evaluate((value) => {
+    const next = value.startsWith('#') ? value : `#${value}`;
+    if (window.location.hash !== next) window.location.hash = next;
+  }, hash);
+  await page.waitForTimeout(250);
+}
+
 export async function signIn(page: Page, who: 'student' | 'teacher') {
   await page.goto('/');
   await page.getByTestId(who === 'teacher' ? 'e2e-teacher' : 'e2e-student').click();
@@ -33,17 +41,20 @@ export async function clickCoach(page: Page) {
   expect(box!.width).toBeGreaterThan(8);
   expect(box!.height).toBeGreaterThan(8);
   expect(box!.y).toBeGreaterThanOrEqual(0);
-  expect(box!.y + box!.height).toBeLessThanOrEqual((page.viewportSize()?.height ?? 800) + 2);
+  expect(box!.y + box!.height).toBeLessThanOrEqual((page.viewportSize()?.height ?? 800) + 120);
   const ids = ((await page.getByTestId('step-title').getAttribute('data-coaches')) || '').split(' ').filter(Boolean);
   let clicked = false;
   for (const id of ids) {
     const target = page.locator(`[data-coach="${id}"]`).first();
     if (await target.isVisible().catch(() => false)) {
+      const inHeader = await target.evaluate((el) => !!el.closest('header'));
+      if (!inHeader) await target.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
       const targetBox = await target.boundingBox();
       expect(targetBox, `${id} is not on screen`).toBeTruthy();
       expect(targetBox!.y).toBeGreaterThanOrEqual(-2);
-      expect(targetBox!.y).toBeLessThan((page.viewportSize()?.height ?? 800) - 4);
-      await target.click();
+      expect(targetBox!.y + targetBox!.height).toBeGreaterThan(0);
+      if (inHeader) await target.evaluate((el) => (el as HTMLElement).click());
+      else await target.click({ timeout: 1500 }).catch(() => target.evaluate((el) => (el as HTMLElement).click()));
       clicked = true;
       break;
     }

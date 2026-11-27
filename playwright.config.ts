@@ -1,4 +1,4 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test';
 
 const chrome = process.env.CHROME_PATH || '/usr/local/bin/google-chrome';
 
@@ -13,9 +13,32 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:5173',
     viewport: { width: 1366, height: 768 },
-    launchOptions: { executablePath: chrome, args: ['--no-sandbox', '--disable-dev-shm-usage'] },
     trace: 'retain-on-failure',
   },
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1366, height: 768 },
+        launchOptions: { executablePath: chrome, args: ['--no-sandbox', '--disable-dev-shm-usage'] },
+      },
+    },
+    {
+      name: 'firefox',
+      use: {
+        ...devices['Desktop Firefox'],
+        viewport: { width: 1366, height: 768 },
+      },
+    },
+    {
+      name: 'webkit',
+      use: {
+        ...devices['Desktop Safari'],
+        viewport: { width: 1366, height: 768 },
+      },
+    },
+  ],
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 5173',
     url: 'http://127.0.0.1:5173',

@@ -60,11 +60,73 @@ html.light-theme .login-card input { background: #fff; color: #161513; }
   0%, 100% { transform: translate(0, 0) rotate(var(--assist-rotate, 0deg)); }
   50% { transform: translate(var(--assist-dx, 10px), var(--assist-dy, 0px)) rotate(var(--assist-rotate, 0deg)); }
 }
+.assist-dim-hole {
+  border-radius: 10px;
+  box-shadow: 0 0 0 4px #fde047, 0 0 0 9999px rgba(2, 6, 23, 0.78);
+}
+.assist-long-arrow-path {
+  animation: assist-draw 0.8s ease forwards;
+}
+@keyframes assist-draw {
+  to { stroke-dashoffset: 0; }
+}
+.assist-hand {
+  animation: assist-hand-glide 2.6s ease-in-out infinite;
+}
+.assist-hand-glyph {
+  display: inline-block;
+  filter: drop-shadow(0 0 4px #0f172a) drop-shadow(0 0 8px #22d3ee);
+  animation: assist-hand-tap 2.6s ease-in-out infinite;
+}
+@keyframes assist-hand-glide {
+  0%, 100% { left: var(--hand-x1); top: var(--hand-y1); }
+  62%, 82% { left: var(--hand-x2); top: var(--hand-y2); }
+}
+@keyframes assist-hand-tap {
+  0%, 60%, 100% { transform: scale(1); }
+  72% { transform: scale(0.82); }
+}
+.assist-ripple {
+  width: 84px;
+  height: 84px;
+  margin: -42px 0 0 -42px;
+  border: 7px solid #4ade80;
+  border-radius: 999px;
+  animation: assist-ripple 0.9s ease-out forwards;
+}
+@keyframes assist-ripple {
+  from { transform: scale(0.4); opacity: 1; }
+  to { transform: scale(1.5); opacity: 0.9; }
+}
+.assist-tick {
+  margin: -18px 0 0 -18px;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #4ade80;
+  animation: assist-tick 0.9s ease-out forwards;
+}
+@keyframes assist-tick {
+  from { transform: scale(0.6); }
+  to { transform: scale(1); }
+}
+.assist-shake {
+  animation: assist-shake 0.45s ease;
+}
+@keyframes assist-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
 @media (prefers-reduced-motion: reduce) {
   .assist-arrow,
-  .assist-blinker {
+  .assist-blinker,
+  .assist-long-arrow-path,
+  .assist-hand,
+  .assist-hand-glyph {
     animation: none !important;
   }
+  .assist-long-arrow-path { stroke-dashoffset: 0 !important; }
+  .assist-hand { left: var(--hand-x2); top: var(--hand-y2); }
   .assist-blinker {
     opacity: 1;
     border-width: 8px;
@@ -73,6 +135,7 @@ html.light-theme .login-card input { background: #fff; color: #161513; }
 }
 
 html.dark-theme header.oracle-header-gradient { min-height: 64px; height: auto; }
+[data-coach] { scroll-margin-top: 12rem; scroll-margin-bottom: 8rem; }
 
 /* Oracle Fusion Sky & Redwood subtle scrollbars */
 ::-webkit-scrollbar {

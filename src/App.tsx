@@ -19,7 +19,7 @@ import { EBSClassicApp } from './components/ebs/EBSClassicApp';
 import { OrientationModule } from './components/orientation/OrientationModule';
 import { ProcessFlowMap } from './components/ProcessFlowMap';
 import { GuideProvider } from './components/guide/GuideLayer';
-import { AssistStyle, ASSIST_KEY, readAssist } from './guide/assist';
+import { AssistFeatures, AssistStyle, ASSIST_KEY, FEATURES_KEY, defaultFeatures, readAssist, readFeatures } from './guide/assist';
 import { CheckCircle2, AlertTriangle, Info, X } from 'lucide-react';
 
 const FONT_KEY = 'oracle_fusion_font';
@@ -38,7 +38,7 @@ const ToastContainer: React.FC = () => {
   const { toasts, dismissToast } = useERP();
   if (toasts.length === 0) return null;
   return (
-    <div className="fixed left-1/2 top-24 z-[55] w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
+    <div className="pointer-events-none fixed left-1/2 top-24 z-[55] w-full max-w-sm -translate-x-1/2 space-y-2 px-3">
       {toasts.map((t) => (
         <div key={t.id} className="flex items-start gap-2 rounded border border-slate-500 bg-slate-900 p-3 text-slate-50 shadow-lg">
           {t.type === 'success' && <CheckCircle2 className="mt-1 h-5 w-5 text-emerald-400" />}
@@ -48,7 +48,7 @@ const ToastContainer: React.FC = () => {
             <div className="font-semibold">{t.title}</div>
             <div className="mt-1 leading-snug">{t.message}</div>
           </div>
-          <button type="button" onClick={() => dismissToast(t.id)} aria-label="Close">
+          <button type="button" className="pointer-events-auto" onClick={() => dismissToast(t.id)} aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -64,7 +64,10 @@ const MainRouter: React.FC<{
   onToggleTheme: () => void;
   assist: AssistStyle;
   onAssist: (value: AssistStyle) => void;
-}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist }) => {
+  features: AssistFeatures;
+  onFeatures: (value: AssistFeatures) => void;
+  voiceNotice?: string;
+}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist, features, onFeatures, voiceNotice }) => {
   const { isSignedIn, currentRoute } = useERP();
   const [navOpen, setNavOpen] = useState(false);
   const [uiMode, setUiMode] = useState<'fusion' | 'ebs'>('fusion');
@@ -82,7 +85,7 @@ const MainRouter: React.FC<{
   if (!isSignedIn) {
     return (
       <>
-        <LoginScreen fontScale={fontScale} onFont={onFont} dark={dark} onToggleTheme={onToggleTheme} assist={assist} onAssist={onAssist} />
+        <LoginScreen fontScale={fontScale} onFont={onFont} dark={dark} onToggleTheme={onToggleTheme} assist={assist} onAssist={onAssist} features={features} onFeatures={onFeatures} voiceNotice={voiceNotice} />
         <ToastContainer />
       </>
     );
@@ -175,10 +178,18 @@ export function App() {
   const [dark, setDark] = useState(() => localStorage.getItem(THEME_KEY) !== 'light');
   const [fontScale, setFontScale] = useState(() => localStorage.getItem(FONT_KEY) || '125');
   const [assist, setAssist] = useState<AssistStyle>(() => readAssist());
+  const [features, setFeatures] = useState<AssistFeatures>(() => readFeatures(readAssist()));
+  const [voiceNotice, setVoiceNotice] = useState('');
+
+  const onAssist = (style: AssistStyle) => {
+    setAssist(style);
+    setFeatures((prev) => defaultFeatures(style, prev));
+  };
 
   useEffect(() => {
     localStorage.setItem(ASSIST_KEY, assist);
-  }, [assist]);
+    localStorage.setItem(FEATURES_KEY, JSON.stringify(features));
+  }, [assist, features]);
 
   useEffect(() => {
     applyPrefs(dark, fontScale);
@@ -192,7 +203,11 @@ export function App() {
         dark={dark}
         onToggleTheme={() => setDark((v) => !v)}
         assist={assist}
-        onAssist={setAssist}
+        onAssist={onAssist}
+        features={features}
+        onFeatures={setFeatures}
+        voiceNotice={voiceNotice}
+        onVoiceNotice={setVoiceNotice}
       >
         <MainRouter
           fontScale={fontScale}
@@ -200,7 +215,10 @@ export function App() {
           dark={dark}
           onToggleTheme={() => setDark((v) => !v)}
           assist={assist}
-          onAssist={setAssist}
+          onAssist={onAssist}
+          features={features}
+          onFeatures={setFeatures}
+          voiceNotice={voiceNotice}
         />
       </GuideProvider>
     </ERPProvider>
