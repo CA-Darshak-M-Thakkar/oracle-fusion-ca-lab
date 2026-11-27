@@ -177,12 +177,15 @@ export const HomeSpringboard: React.FC = () => {
   const openAR = arTransactions.filter((t) => t.balanceDue > 0).length;
   const pendingReq = requisitions.filter((r) => r.status === 'Pending approval').length;
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+
   return (
     <div className="oracle-sky-gradient min-h-[calc(100vh-48px)] pb-12">
       <div className="max-w-6xl mx-auto px-6 pt-8">
         {/* Greeting */}
         <h1 className="text-[28px] font-light text-[#1D3549] tracking-tight">
-          Good afternoon, {currentUser.name}
+          {greeting}, {currentUser.name}
         </h1>
 
         {/* Category Tabs */}
