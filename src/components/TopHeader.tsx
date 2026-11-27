@@ -360,13 +360,14 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchT
               <div className="px-4 py-3 bg-[#F4F6F9] border-b border-[#D6DFE6]">
                 <div className="text-[13px] font-semibold">{currentUser.name}</div>
                 {currentUser.email && <div className="text-[11px] text-[#524C46] truncate">{currentUser.email}</div>}
+                {currentUser.wroNo && <div className="text-[11px] text-[#524C46]">WRO: {currentUser.wroNo}</div>}
                 <div className="text-[11.5px] text-[#00688C] font-medium mt-0.5">{currentUser.role}</div>
                 <div className="text-[11px] text-[#5E5852]">{currentUser.department}</div>
               </div>
 
               <div className="p-2 border-b border-[#E6ECF0]">
                 <div className="px-2 py-1 text-[10.5px] font-semibold uppercase text-[#5E6C7A] flex items-center gap-1">
-                  <Users className="w-3 h-3" /> Switch User Role (Test SoD)
+                  <Users className="w-3 h-3" /> Switch Role (Test SoD)
                 </div>
                 {DEMO_USERS.map((u) => (
                   <button
@@ -376,11 +377,10 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchT
                       setOpenDropdown(null);
                     }}
                     className={`w-full text-left px-2.5 py-1.5 rounded text-[12px] flex items-center justify-between ${
-                      u.id === currentUser.id ? 'bg-[#EDF6FA] text-[#00688C] font-semibold' : 'hover:bg-[#F4F6F9]'
+                      u.role === currentUser.role ? 'bg-[#EDF6FA] text-[#00688C] font-semibold' : 'hover:bg-[#F4F6F9]'
                     }`}
                   >
-                    <span>{u.name}</span>
-                    <span className="text-[10.5px] text-[#5E5852]">{u.initials}</span>
+                    <span>{u.role}</span>
                   </button>
                 ))}
               </div>

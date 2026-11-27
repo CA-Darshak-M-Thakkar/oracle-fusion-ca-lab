@@ -173,7 +173,7 @@ interface ERPContextType {
   resetDemoData: () => void;
 }
 
-const STORAGE_KEY = 'oracle_fusion_ca_sim_inr_v1';
+const STORAGE_KEY = 'oracle_fusion_ca_sim_inr_v2';
 
 const ERPContext = createContext<ERPContextType | undefined>(undefined);
 
@@ -467,8 +467,14 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const switchUser = (userId: string) => {
     const found = DEMO_USERS.find((u) => u.id === userId);
     if (found) {
-      setCurrentUser(found);
-      showToast('info', 'Role Switched', `Now operating as ${found.name} (${found.role})`);
+      setCurrentUser((prev) => ({
+        ...prev,
+        role: found.role,
+        department: found.department,
+        canApprovePO: found.canApprovePO,
+        canCreatePayment: found.canCreatePayment,
+      }));
+      showToast('info', 'Role Switched', `Operating as ${currentUser.name} — ${found.role}`);
     }
   };
 
