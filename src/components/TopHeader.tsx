@@ -13,6 +13,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   FolderDown,
+  GitBranch,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import { useERP } from '../context/ERPContext';
 import { DEMO_USERS } from '../data/seedData';
@@ -22,6 +25,10 @@ import { StudentLabPackModal } from './StudentLabPackModal';
 interface TopHeaderProps {
   onOpenNavigator: () => void;
   onSwitchToEBS?: () => void;
+  processMapOpen?: boolean;
+  onToggleProcessMap?: () => void;
+  darkMode?: boolean;
+  onToggleDarkMode?: () => void;
 }
 
 const SEARCH_INDEX: { label: string; category: string; route: ModuleRoute }[] = [
@@ -44,7 +51,14 @@ const SEARCH_INDEX: { label: string; category: string; route: ModuleRoute }[] = 
   { label: 'CA Audit Lab & Red Flags (Case Studies 9.1 & 9.2)', category: 'Risk Management', route: 'ca_audit_lab' },
 ];
 
-export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchToEBS }) => {
+export const TopHeader: React.FC<TopHeaderProps> = ({
+  onOpenNavigator,
+  onSwitchToEBS,
+  processMapOpen,
+  onToggleProcessMap,
+  darkMode,
+  onToggleDarkMode,
+}) => {
   const {
     currentUser,
     switchUser,
@@ -179,6 +193,32 @@ export const TopHeader: React.FC<TopHeaderProps> = ({ onOpenNavigator, onSwitchT
 
       {/* Right: Utility Icons */}
       <div className="flex items-center gap-1.5">
+        {onToggleProcessMap && (
+          <button
+            onClick={onToggleProcessMap}
+            title="Visual Process Map with Arrow-Key Navigation (← →)"
+            className={`px-2.5 py-1 rounded text-[11.5px] font-medium flex items-center gap-1 transition-colors mr-1 whitespace-nowrap shrink-0 ${
+              processMapOpen
+                ? 'bg-[#38BDF8] text-[#0F172A] font-semibold'
+                : 'bg-white/15 text-white hover:bg-white/25'
+            }`}
+          >
+            <GitBranch className="w-3.5 h-3.5" />
+            <span className="hidden lg:inline">Process Map (← →)</span>
+            <span className="lg:hidden">Map</span>
+          </button>
+        )}
+
+        {onToggleDarkMode && (
+          <button
+            onClick={onToggleDarkMode}
+            title={darkMode ? 'Switch to Light Theme' : 'Switch to Dark Theme (Projector Mode)'}
+            className="p-1.5 rounded bg-white/15 hover:bg-white/25 text-white transition-colors shrink-0"
+          >
+            {darkMode ? <Sun className="w-4 h-4 text-[#FFE082]" /> : <Moon className="w-4 h-4" />}
+          </button>
+        )}
+
         {onSwitchToEBS && (
           <button
             onClick={onSwitchToEBS}

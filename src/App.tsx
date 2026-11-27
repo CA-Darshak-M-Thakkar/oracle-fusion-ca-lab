@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ERPProvider, useERP } from './context/ERPContext';
 import { LoginScreen } from './components/LoginScreen';
 import { TopHeader } from './components/TopHeader';
 import { NavigatorDrawer } from './components/NavigatorDrawer';
 import { HomeSpringboard } from './components/HomeSpringboard';
 import { CATeachingBar } from './components/CATeachingBar';
+import { ProcessFlowMap } from './components/ProcessFlowMap';
 import { RequisitionsModule } from './components/p2p/RequisitionsModule';
 import { PurchaseOrdersModule } from './components/p2p/PurchaseOrdersModule';
 import { ReceiptsModule } from './components/p2p/ReceiptsModule';
@@ -49,6 +50,20 @@ const MainRouter: React.FC = () => {
   const { isSignedIn, currentRoute } = useERP();
   const [navOpen, setNavOpen] = useState(false);
   const [uiMode, setUiMode] = useState<'fusion' | 'ebs'>('fusion');
+  const [processMapOpen, setProcessMapOpen] = useState(true);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    return localStorage.getItem('oracle_fusion_dark_mode') === 'true';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.add('dark-theme');
+    } else {
+      root.classList.remove('dark-theme');
+    }
+    localStorage.setItem('oracle_fusion_dark_mode', String(darkMode));
+  }, [darkMode]);
 
   if (!isSignedIn) {
     return (
@@ -119,7 +134,15 @@ const MainRouter: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <TopHeader onOpenNavigator={() => setNavOpen(true)} onSwitchToEBS={() => setUiMode('ebs')} />
+      <TopHeader
+        onOpenNavigator={() => setNavOpen(true)}
+        onSwitchToEBS={() => setUiMode('ebs')}
+        processMapOpen={processMapOpen}
+        onToggleProcessMap={() => setProcessMapOpen(!processMapOpen)}
+        darkMode={darkMode}
+        onToggleDarkMode={() => setDarkMode(!darkMode)}
+      />
+      <ProcessFlowMap open={processMapOpen} onClose={() => setProcessMapOpen(false)} />
       <CATeachingBar />
       <NavigatorDrawer open={navOpen} onClose={() => setNavOpen(false)} />
       <main className="flex-1">{renderModule()}</main>

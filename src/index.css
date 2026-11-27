@@ -58,6 +58,99 @@
   @apply bg-[#EFF3F7] text-[#312D2A] text-[12px] font-semibold border-b border-[#D6DFE6] select-none;
 }
 
+/* ==========================================================================
+   DARK THEME OVERRIDES (Projector / Classroom High-Contrast Dark Mode)
+   ========================================================================== */
+html.dark-theme body {
+  background-color: #0B1120;
+  color: #F1F5F9;
+}
+
+html.dark-theme .oracle-header-gradient {
+  background: linear-gradient(90deg, #0F172A 0%, #1E293B 100%);
+  border-bottom: 1px solid #334155;
+}
+
+html.dark-theme .oracle-sky-gradient {
+  background: linear-gradient(180deg, #0F172A 0%, #162238 60%, #1E293B 100%);
+}
+
+html.dark-theme .oracle-panel {
+  background-color: #111827 !important;
+  border-color: #334155 !important;
+  color: #F1F5F9 !important;
+}
+
+html.dark-theme .oracle-table-header {
+  background-color: #1E293B !important;
+  color: #E2E8F0 !important;
+  border-color: #334155 !important;
+}
+
+html.dark-theme .oracle-input,
+html.dark-theme .oracle-select {
+  background-color: #0F172A !important;
+  border-color: #475569 !important;
+  color: #F8FAFC !important;
+}
+
+html.dark-theme .oracle-btn-secondary {
+  background-color: #1E293B !important;
+  border-color: #475569 !important;
+  color: #F1F5F9 !important;
+}
+html.dark-theme .oracle-btn-secondary:hover {
+  background-color: #334155 !important;
+}
+
+/* General surface & text adaptation in dark mode */
+html.dark-theme .bg-white {
+  background-color: #111827 !important;
+  color: #F1F5F9;
+}
+html.dark-theme .bg-\[\#F4F6F9\],
+html.dark-theme .bg-\[\#FAFBFD\],
+html.dark-theme .bg-\[\#F8FAFC\] {
+  background-color: #0B1120 !important;
+}
+html.dark-theme .bg-\[\#EFF3F7\],
+html.dark-theme .bg-\[\#D9E2EC\],
+html.dark-theme .bg-\[\#B8D4E8\] {
+  background-color: #1E293B !important;
+  color: #E2E8F0 !important;
+}
+html.dark-theme .bg-\[\#EDF6FA\],
+html.dark-theme .bg-\[\#F6FAFD\] {
+  background-color: #16293D !important;
+}
+html.dark-theme .bg-\[\#FFFBEB\] {
+  background-color: #1E1B12 !important;
+  color: #FDE68A !important;
+  border-color: #78350F !important;
+}
+html.dark-theme .border-\[\#D6DFE6\],
+html.dark-theme .border-\[\#E6ECF0\],
+html.dark-theme .border-\[\#EEF2F5\],
+html.dark-theme .border-\[\#BCC6D0\] {
+  border-color: #334155 !important;
+}
+html.dark-theme .text-\[\#161513\],
+html.dark-theme .text-\[\#312D2A\],
+html.dark-theme .text-\[\#1D3549\],
+html.dark-theme .text-\[\#0F2C40\],
+html.dark-theme .text-\[\#0A2538\],
+html.dark-theme .text-\[\#524C46\] {
+  color: #F1F5F9 !important;
+}
+html.dark-theme .text-\[\#5E6C7A\],
+html.dark-theme .text-\[\#5E5852\],
+html.dark-theme .text-\[\#8C847C\] {
+  color: #94A3B8 !important;
+}
+html.dark-theme .text-\[\#00688C\] {
+  color: #38BDF8 !important;
+}
+
 @media print {
   .no-print {
     display: none !important;
