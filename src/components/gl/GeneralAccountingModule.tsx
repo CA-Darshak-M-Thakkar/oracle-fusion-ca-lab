@@ -138,7 +138,7 @@ export const GeneralAccountingModule: React.FC = () => {
       title="General Accounting — Inquire on Detail Balances"
       route="detail_balances"
       caConceptTitle="CA Concept: General Ledger Detail Balances"
-      caConceptBody="Shows live Beginning Balance, Period Debits, Period Credits, and Ending Balance for every GL account in US_Primary_Ledger. Any P2P or O2C transaction you post updates these numbers immediately."
+      caConceptBody="Shows live Beginning Balance, Period Debits, Period Credits, and Ending Balance for every account in ABC India Primary Ledger. Any purchase or sale you post updates these numbers immediately."
       actions={
         <div className="flex gap-2">
           <button onClick={() => navigate('journals')} className="oracle-btn-secondary">

@@ -13,6 +13,7 @@ export const PayablesModule: React.FC = () => {
     apInvoices,
     createAPInvoice,
     validateAPInvoice,
+    releaseInvoiceHold,
     postAPInvoiceToLedger,
     apPayments,
     createAPPayment,
@@ -195,7 +196,7 @@ export const PayablesModule: React.FC = () => {
             <div className="space-y-3">
               <div className="grid grid-cols-3 items-center gap-2">
                 <label className="text-right font-medium">* Business Unit</label>
-                <input readOnly value="US1 Business Unit" className="col-span-2 oracle-input bg-[#F4F6F9]" />
+                <input readOnly value="ABC Mumbai Business Unit" className="col-span-2 oracle-input bg-[#F4F6F9]" />
               </div>
               <div className="grid grid-cols-3 items-center gap-2">
                 <label className="text-right font-medium">* Supplier or Party</label>
@@ -510,6 +511,16 @@ export const PayablesModule: React.FC = () => {
                   <td className="p-2.5 text-right font-semibold">₹{inv.unpaidAmount.toFixed(2)}</td>
                   <td className="p-2.5">{inv.status}</td>
                   <td className="p-2.5 flex gap-2">
+                    {inv.status === 'On Hold' && !inv.holdReleased && (
+                      <button
+                        type="button"
+                        data-testid={`release-${inv.id}`}
+                        onClick={() => releaseInvoiceHold(inv.id)}
+                        className="text-[#C74634] hover:underline text-[12px]"
+                      >
+                        Release hold
+                      </button>
+                    )}
                     {inv.status === 'Needs Revalidation' && (
                       <button
                         onClick={() => validateAPInvoice(inv.id)}
@@ -518,7 +529,7 @@ export const PayablesModule: React.FC = () => {
                         Validate
                       </button>
                     )}
-                    {!inv.postedToLedger && (
+                    {!inv.postedToLedger && inv.status !== 'On Hold' && (
                       <button
                         onClick={() => postAPInvoiceToLedger(inv.id)}
                         className="text-[#2E7D32] hover:underline text-[12px]"

@@ -319,13 +319,13 @@ export const ScheduledProcessesModule: React.FC = () => {
                 </select>
               </div>
               <div className="p-3 bg-[#F8FAFC] border rounded text-[12px] text-[#5E5852]">
-                Parameters: Ledger = <strong>US_Primary_Ledger</strong> | Business Unit = <strong>US1 / EXA_BU</strong>
+                Parameters: Ledger = <strong>ABC India Primary Ledger</strong> | Business Unit = <strong>ABC Mumbai Business Unit</strong>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <button
                 onClick={() => {
-                  const job = scheduleNewProcess(selectedReportType, { Ledger: 'US_Primary_Ledger' });
+                  const job = scheduleNewProcess(selectedReportType, { Ledger: 'ABC India Primary Ledger' });
                   setViewingJob(job);
                   setModalOpen(false);
                 }}

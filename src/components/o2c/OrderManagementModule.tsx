@@ -91,7 +91,7 @@ export const OrderManagementModule: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <div><span className="text-[#5E6C7A] w-32 inline-block">Business Unit:</span> <strong>EXA_BU</strong></div>
+              <div><span className="text-[#5E6C7A] w-32 inline-block">Business Unit:</span> <strong>ABC Mumbai Business Unit</strong></div>
               <div><span className="text-[#5E6C7A] w-32 inline-block">Bill-to Account:</span> {cust.account}</div>
               <div><span className="text-[#5E6C7A] w-32 inline-block">Ship-to Address:</span> {cust.shipToAddress}</div>
               <div>

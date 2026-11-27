@@ -54,7 +54,7 @@ export const PurchaseOrdersModule: React.FC = () => {
                 <div>
                   <label className="block text-[11.5px] text-[#5E6C7A] mb-1">Requisitioning BU</label>
                   <select className="w-full oracle-select">
-                    <option>US1 Business Unit</option>
+                    <option>ABC Mumbai Business Unit</option>
                   </select>
                 </div>
                 <div>

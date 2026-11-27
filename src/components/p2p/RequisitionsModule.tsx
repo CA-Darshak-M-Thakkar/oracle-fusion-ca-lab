@@ -141,10 +141,9 @@ export const RequisitionsModule: React.FC = () => {
                   <span className="text-[#C74634]">*</span> Category Name
                 </label>
                 <select value={category} onChange={(e) => setCategory(e.target.value)} className="col-span-2 oracle-select">
-                  <option value="Miscellaneous">Miscellaneous</option>
-                  <option value="IT Hardware">IT Hardware</option>
-                  <option value="Manufacturing">Manufacturing</option>
-                  <option value="Office Supplies">Office Supplies</option>
+                  <option value="Furniture">Furniture</option>
+                  <option value="Stationery">Stationery</option>
+                  <option value="Office equipment">Office equipment</option>
                 </select>
               </div>
               <div className="grid grid-cols-3 items-center gap-2">
@@ -165,9 +164,8 @@ export const RequisitionsModule: React.FC = () => {
                   <span className="text-[#C74634]">*</span> UOM Name
                 </label>
                 <select value={uom} onChange={(e) => setUom(e.target.value)} className="col-span-2 oracle-select">
-                  <option value="01EACH">01EACH</option>
-                  <option value="EKG">EKG</option>
-                  <option value="BOX">BOX</option>
+                  <option value="Nos">Nos</option>
+                  <option value="Ream">Ream</option>
                 </select>
               </div>
               <div className="grid grid-cols-3 items-center gap-2">

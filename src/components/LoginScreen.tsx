@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useERP } from '../context/ERPContext';
 import { GOOGLE_CLIENT_ID } from '../config/auth';
+import { e2eBypassEnabled } from '../config/e2e';
+import { AssistStyle } from '../guide/assist';
+import { ClassroomToolbar } from './ClassroomToolbar';
 
 function decodeJwt(token: string): { name?: string; email?: string; email_verified?: boolean } {
   const part = token.split('.')[1] || '';
@@ -13,7 +16,9 @@ export const LoginScreen: React.FC<{
   onFont: (v: string) => void;
   dark: boolean;
   onToggleTheme: () => void;
-}> = ({ fontScale, onFont, dark, onToggleTheme }) => {
+  assist: AssistStyle;
+  onAssist: (value: AssistStyle) => void;
+}> = ({ fontScale, onFont, dark, onToggleTheme, assist, onAssist }) => {
   const { signIn } = useERP();
   const btnRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState('');
@@ -80,19 +85,14 @@ export const LoginScreen: React.FC<{
             <p className="text-lg text-sky-300">AICITSS classroom</p>
             <h1 className="text-4xl font-semibold leading-tight">Oracle Fusion practice</h1>
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-lg">
-              Text
-              <select className="ml-2 rounded bg-slate-800 px-2 py-2 text-lg" value={fontScale} onChange={(e) => onFont(e.target.value)}>
-                <option value="100">100%</option>
-                <option value="125">125%</option>
-                <option value="150">150%</option>
-              </select>
-            </label>
-            <button type="button" className="rounded bg-slate-700 px-3 py-2 text-lg" onClick={onToggleTheme}>
-              {dark ? 'Light theme' : 'Dark theme'}
-            </button>
-          </div>
+          <ClassroomToolbar
+            fontScale={fontScale}
+            onFont={onFont}
+            dark={dark}
+            onToggleTheme={onToggleTheme}
+            assist={assist}
+            onAssist={onAssist}
+          />
         </div>
 
         <div className="login-card rounded-xl border p-6 sm:p-8">
@@ -104,6 +104,17 @@ export const LoginScreen: React.FC<{
             <div ref={btnRef} className="min-h-[44px]" />
             {!googleReady && !error && <p className="mt-3 text-lg">Loading Google sign-in…</p>}
           </div>
+
+          {e2eBypassEnabled && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button type="button" data-testid="e2e-student" className="rounded bg-slate-700 px-3 py-2 text-lg" onClick={() => signIn({ name: 'Asha Student', email: 'asha.student@example.com' })}>
+                Test sign-in as student
+              </button>
+              <button type="button" data-testid="e2e-teacher" className="rounded bg-slate-700 px-3 py-2 text-lg" onClick={() => signIn({ name: 'Darshak Thakkar', email: 'cadmthakkar@gmail.com' })}>
+                Test sign-in as teacher
+              </button>
+            </div>
+          )}
 
           {error && (
             <p className="mt-4 rounded border border-rose-400 bg-rose-950 px-3 py-3 text-lg leading-snug text-rose-100" role="alert">

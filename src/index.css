@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+  html, body, #root { max-width: 100%; overflow-x: hidden; }
   html { font-size: 18px; }
   html[data-font="100"] { font-size: 18px; }
   html[data-font="125"] { font-size: 22px; }
@@ -30,14 +31,44 @@ html.light-theme .login-screen { background: #f4f6f9; color: #161513; }
 html.light-theme .login-card { background: #ffffff; border-color: #d6dfe6; color: #161513; }
 html.light-theme .login-card input { background: #fff; color: #161513; }
 
-.coach-ring {
-  border: 3px solid #fbbf24;
-  box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.35), 0 0 0 9999px rgba(2, 6, 23, 0.55);
-  animation: coachpulse 1.4s ease-out infinite;
+.assist-highlighter {
+  border: 6px solid #fde047;
+  box-shadow: 0 0 0 4px #22d3ee, 0 0 22px 6px rgba(253, 224, 71, 0.95);
+  border-radius: 8px;
 }
-@keyframes coachpulse {
-  0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.8), 0 0 0 9999px rgba(2, 6, 23, 0.55); }
-  100% { box-shadow: 0 0 0 14px rgba(251, 191, 36, 0), 0 0 0 9999px rgba(2, 6, 23, 0.55); }
+.assist-blinker {
+  border: 6px solid #22d3ee;
+  border-radius: 10px;
+  animation: assist-blink 0.7s steps(2, end) infinite;
+}
+.assist-spotlight {
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px #fde047, 0 0 0 9999px rgba(2, 6, 23, 0.78);
+}
+.assist-arrow {
+  width: 72px;
+  height: 72px;
+  filter: drop-shadow(0 0 6px #0f172a) drop-shadow(0 0 10px #22d3ee);
+  animation: assist-nudge 0.85s ease-in-out infinite;
+}
+@keyframes assist-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.12; }
+}
+@keyframes assist-nudge {
+  0%, 100% { transform: translate(0, 0) rotate(var(--assist-rotate, 0deg)); }
+  50% { transform: translate(var(--assist-dx, 10px), var(--assist-dy, 0px)) rotate(var(--assist-rotate, 0deg)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .assist-arrow,
+  .assist-blinker {
+    animation: none !important;
+  }
+  .assist-blinker {
+    opacity: 1;
+    border-width: 8px;
+    border-color: #fde047;
+  }
 }
 
 html.dark-theme header.oracle-header-gradient { min-height: 64px; height: auto; }

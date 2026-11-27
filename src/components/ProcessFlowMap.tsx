@@ -143,7 +143,7 @@ const CYCLES: CycleDef[] = [
       {
         step: 'Step 1',
         title: 'Detail Balances',
-        subtitle: 'Inquire US_Primary_Ledger',
+        subtitle: 'Inquire ABC India Primary Ledger',
         accounting: 'Live Beginning, Dr, Cr, Ending',
         route: 'detail_balances',
         icon: <BarChart3 className="w-5 h-5" />,

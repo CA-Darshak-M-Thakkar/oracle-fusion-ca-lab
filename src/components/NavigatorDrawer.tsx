@@ -50,6 +50,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Billing', route: 'receivables_billing' },
       { label: 'Accounts Receivable', route: 'accounts_receivable' },
+      { label: 'Bank Reconciliation', route: 'bank_reconciliation' },
     ],
   },
   {
@@ -81,6 +82,9 @@ export const NavigatorDrawer: React.FC<NavigatorDrawerProps> = ({ open, onClose 
     Procurement: true,
     Payables: true,
     'Order Management': true,
+    'Supply Chain Execution': true,
+    Receivables: true,
+    'General Accounting': true,
     Tools: true,
     'Risk Management': true,
   });
@@ -112,7 +116,7 @@ export const NavigatorDrawer: React.FC<NavigatorDrawerProps> = ({ open, onClose 
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-2">
+        <div className="flex-1 overflow-y-auto py-2 pb-28">
           <button
             onClick={() => handleNav('home')}
             className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-[#312D2A] hover:bg-[#EDF6FA] flex items-center gap-2.5 border-b border-[#F0F3F5]"

@@ -103,7 +103,7 @@ export const StudentLabPackModal: React.FC<StudentLabPackModalProps> = ({ open, 
             <Users className="w-4 h-4" />
             Student Lab Pack, Sample Files & Live Task Tracker
           </div>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded">
+          <button type="button" aria-label="Close lab pack" onClick={onClose} className="hover:bg-white/20 p-1 rounded">
             <X className="w-4 h-4" />
           </button>
         </div>

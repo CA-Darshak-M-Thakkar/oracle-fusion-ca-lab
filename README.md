@@ -28,6 +28,8 @@ The person who prepares a document cannot approve it. Held bills cannot be paid 
 
 Dark theme and larger text are the default (body from 18px, and the control starts at 125%). A light theme and 100 / 125 / 150% text are on the login screen. The guide bar stays with you after login.
 
+Assist style sits with those controls, and again in teacher mode. The choice is saved in this browser. All combined is the default: an arrow, a thick yellow outline, a cyan ring, and a spotlight. Students can pick one of those, or turn guidance off. The mark scrolls the next control into view. If the computer asks for less motion, the arrow and the ring stay still and the ring is a solid yellow box.
+
 ## Teacher mode
 
 Only these emails open the presenter panel (talking points, jump to any step, free explore, reset demo data, attendance note):
@@ -75,6 +77,10 @@ The login screen is **Sign in with Google** only. The web client ID is in `src/c
 If you rotate the client, replace that constant or build with `VITE_GOOGLE_CLIENT_ID=your-id npm run build`, then publish GitHub Pages again.
 
 Privacy and terms are `privacy.html` and `terms.html` on the same site. They say the class collects name and email only, writes them to the teacher’s Google Sheet, and does not sell or share them. Contact is cadmthakkar@gmail.com.
+
+## Tests
+
+`npm run test:e2e` runs Playwright against the Vite dev server with `VITE_E2E_BYPASS=1`. That flag only works while Vite is in development. A production build (`npm run build`) does not include the test sign-in buttons, and GitHub Pages still requires Google.
 
 ## Deploy
 

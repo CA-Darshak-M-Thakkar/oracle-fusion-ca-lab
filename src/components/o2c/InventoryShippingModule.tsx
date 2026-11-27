@@ -67,9 +67,8 @@ export const InventoryShippingModule: React.FC = () => {
                   disabled={shp.status === 'Confirmed'}
                   className="oracle-select"
                 >
-                  <option value="Fed EX-Parcel-Truck">Fed EX-Parcel-Truck</option>
-                  <option value="DHL Air Freight">DHL Air Freight</option>
-                  <option value="BlueDart Surface">BlueDart Surface</option>
+                  <option value="Blue Dart Surface">Blue Dart Surface</option>
+                  <option value="India Post Surface">India Post Surface</option>
                 </select>
               </div>
               <div className="flex items-center gap-2">

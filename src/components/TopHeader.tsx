@@ -136,7 +136,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
   return (
     <header
       ref={headerRef}
-      className="oracle-header-gradient text-white h-[48px] px-3 flex items-center justify-between shadow-sm relative z-40 no-print"
+      className="oracle-header-gradient text-white min-h-[64px] h-auto px-3 flex items-center justify-between gap-2 shadow-sm relative z-40 no-print max-w-full overflow-x-auto"
     >
       {/* Left: Navigator + ORACLE wordmark */}
       <div className="flex items-center gap-3">

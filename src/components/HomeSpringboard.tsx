@@ -189,7 +189,7 @@ export const HomeSpringboard: React.FC = () => {
         </h1>
 
         {/* Category Tabs */}
-        <div data-coach="springboard" className="mt-6 flex items-center gap-6 overflow-x-auto border-b border-white/30 pb-2">
+        <div data-coach="springboard" className="mt-6 flex max-w-full items-center gap-6 overflow-x-auto border-b border-white/30 pb-2">
           {SPRINGBOARD_TABS.map((tab) => {
             const active = activeSpringboardTab === tab;
             return (

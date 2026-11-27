@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import { useERP } from '../../context/ERPContext';
 import { emitGuide } from '../../guide/events';
 import { COMPANY, inr } from '../../data/company';
+import { useGuide } from '../guide/GuideLayer';
 
 export const CaseStudies: React.FC = () => {
   const { purchaseOrders, receipts, apInvoices, inventoryAdjustments, salesOrders, shipments, arTransactions, items } = useERP();
-  const [tab, setTab] = useState<'91' | '92' | 'lmn' | 'extra'>('91');
+  const { stepId } = useGuide();
+  const [manualTab, setManualTab] = useState<'91' | '92' | 'lmn' | 'extra'>('91');
+  const guidedTab = stepId === 'aud-91' ? '91' : stepId === 'aud-92' ? '92' : stepId === 'aud-lmn' ? 'lmn' : null;
+  const tab = guidedTab ?? manualTab;
+  const setTab = setManualTab;
   const [movementOn, setMovementOn] = useState(false);
   const [docsOn, setDocsOn] = useState(false);
   const paper = 'A4 Paper Ream';

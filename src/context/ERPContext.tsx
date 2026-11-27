@@ -56,6 +56,7 @@ import {
   INITIAL_NOTIFICATIONS,
   INITIAL_BANK_LINES,
 } from '../data/seedData';
+import { e2eBypassEnabled } from '../config/e2e';
 import { emitGuide } from '../guide/events';
 import { formatHash, parseHash } from '../guide/hash';
 
@@ -410,7 +411,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     history.replaceState(null, '', formatHash('orientation', null, 'ori-erp'));
     window.dispatchEvent(new CustomEvent('fusion-guide-reset'));
     const role = classRoleFor(email);
-    if (GOOGLE_SHEET_WEBHOOK_URL) {
+    if (GOOGLE_SHEET_WEBHOOK_URL && !e2eBypassEnabled) {
       fetch(GOOGLE_SHEET_WEBHOOK_URL, {
         method: 'POST',
         mode: 'no-cors',

@@ -2,8 +2,14 @@ import React, { createContext, useContext, useEffect, useLayoutEffect, useState 
 import { ChevronLeft, ChevronRight, GraduationCap, RotateCcw } from 'lucide-react';
 import { useERP } from '../../context/ERPContext';
 import { LAB_META, STEPS, stepIndex } from '../../guide/curriculum';
+import { AssistStyle } from '../../guide/assist';
 import { emitGuide } from '../../guide/events';
 import { formatHash, parseHash } from '../../guide/hash';
+import { ClassroomToolbar } from '../ClassroomToolbar';
+
+function assistOn(assist: AssistStyle, part: 'arrow' | 'highlighter' | 'blinker' | 'spotlight') {
+  return assist === 'all' || assist === part;
+}
 
 interface GuideApi {
   stepId: string;
@@ -25,7 +31,15 @@ function findCoach(ids: string[]): HTMLElement | null {
   return null;
 }
 
-export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const GuideProvider: React.FC<{
+  children: React.ReactNode;
+  fontScale: string;
+  onFont: (value: string) => void;
+  dark: boolean;
+  onToggleTheme: () => void;
+  assist: AssistStyle;
+  onAssist: (value: AssistStyle) => void;
+}> = ({ children, fontScale, onFont, dark, onToggleTheme, assist, onAssist }) => {
   const { isSignedIn, currentUser, navigate, currentRoute, selectedId, resetDemoData } = useERP();
   const [index, setIndex] = useState(() => stepIndex(parseHash()?.stepId));
   const [phase, setPhase] = useState<'act' | 'bubble'>('act');
@@ -69,7 +83,17 @@ export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   useLayoutEffect(() => {
     if (!isSignedIn) return;
-    const place = () => setRect(findCoach(step.coach)?.getBoundingClientRect() ?? null);
+    const place = () => {
+      const el = findCoach(step.coach);
+      if (!el) {
+        setRect(null);
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      const inView = r.top >= 64 && r.bottom <= window.innerHeight - 88 && r.left >= 0 && r.right <= window.innerWidth;
+      if (!inView) el.scrollIntoView({ block: 'center', inline: 'nearest' });
+      setRect(el.getBoundingClientRect());
+    };
     place();
     const iv = window.setInterval(place, 500);
     window.addEventListener('resize', place);
@@ -86,6 +110,7 @@ export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const target = STEPS[next];
     setIndex(next);
     setPhase('act');
+    window.dispatchEvent(new Event('fusion-close-overlays'));
     const parsed = parseHash();
     if (freeExplore && isTeacher) {
       history.replaceState(null, '', formatHash(parsed?.route || target.route, parsed?.id, target.id));
@@ -114,9 +139,17 @@ export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             <div className="text-base font-semibold text-sky-300">
               Module {labPos} of {LAB_META.length} · Step {modulePos} of {moduleSteps.length}
             </div>
-            <div className="text-xl font-semibold leading-tight">{step.title}</div>
+            <div data-testid="step-title" data-complete={step.completeOn} data-coaches={step.coach.join(' ')} className="text-xl font-semibold leading-tight">{step.title}</div>
           </div>
           <p className="max-w-xl flex-1 text-lg leading-snug text-slate-100">{step.plain}</p>
+          <ClassroomToolbar
+            fontScale={fontScale}
+            onFont={onFont}
+            dark={dark}
+            onToggleTheme={onToggleTheme}
+            assist={assist}
+            onAssist={onAssist}
+          />
           {isTeacher && (
             <button
               type="button"
@@ -133,13 +166,33 @@ export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <GuideCtx.Provider value={{ stepId: step.id, index, isTeacher }}>
       {lessonBar}
-      {children}
-      {phase === 'act' && rect && (
-        <div className="pointer-events-none fixed z-[60]" style={{ top: rect.top - 6, left: rect.left - 6, width: rect.width + 12, height: rect.height + 12 }}>
-          <div className="coach-ring absolute inset-0 rounded-md" />
+      <div className={isTeacher && teacherOpen ? 'xl:pr-[26rem]' : ''}>{children}</div>
+      {phase === 'act' && rect && assist !== 'off' && (
+        <div data-testid="assist-layer" data-assist={assist} className="pointer-events-none fixed z-[60]" style={{ top: rect.top - 8, left: rect.left - 8, width: rect.width + 16, height: rect.height + 16 }}>
+          {assistOn(assist, 'spotlight') && <div data-testid="assist-spotlight" className="assist-spotlight absolute inset-0" />}
+          {assistOn(assist, 'highlighter') && <div data-testid="assist-highlighter" className="assist-highlighter absolute inset-0" />}
+          {assistOn(assist, 'blinker') && <div data-testid="assist-blinker" className="assist-blinker absolute -inset-1" />}
+          <div data-testid="coach-ring" className="absolute inset-0" />
         </div>
       )}
-      {phase === 'act' && (
+      {phase === 'act' && rect && assistOn(assist, 'arrow') && (
+        <div
+          data-testid="assist-arrow"
+          className="assist-arrow pointer-events-none fixed z-[62]"
+          style={{
+            top: rect.left > 96 ? rect.top + rect.height / 2 - 36 : Math.max(8, rect.top - 80),
+            left: rect.left > 96 ? rect.left - 84 : rect.left + rect.width / 2 - 36,
+            ['--assist-rotate' as string]: rect.left > 96 ? '0deg' : '90deg',
+            ['--assist-dx' as string]: rect.left > 96 ? '12px' : '0px',
+            ['--assist-dy' as string]: rect.left > 96 ? '0px' : '12px',
+          }}
+        >
+          <svg viewBox="0 0 72 72" aria-hidden="true">
+            <path d="M8 28h34L32 14l10 22L32 58l10-14H8z" fill="#fde047" stroke="#22d3ee" strokeWidth="4" />
+          </svg>
+        </div>
+      )}
+      {phase === 'act' && assist !== 'off' && (
         <div
           className="pointer-events-none fixed z-[61] max-w-sm rounded-lg border-2 border-amber-300 bg-slate-950 px-4 py-3 text-amber-50 shadow-2xl"
           style={{ top: rect ? calloutTop : 96, left: rect ? Math.min(rect.left, window.innerWidth - 360) : 24 }}
@@ -150,15 +203,32 @@ export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       )}
 
       {isTeacher && teacherOpen && (
-        <aside className="fixed right-3 top-24 z-[65] max-h-[70vh] w-[min(420px,92vw)] overflow-auto rounded-lg border border-amber-300 bg-slate-900 p-4 text-slate-50 shadow-2xl">
+        <aside className="fixed inset-x-3 bottom-24 z-[64] max-h-[34vh] overflow-auto rounded-lg border border-amber-300 bg-slate-900 p-4 text-slate-50 shadow-2xl xl:inset-x-auto xl:bottom-auto xl:right-3 xl:top-36 xl:max-h-[70vh] xl:w-[24rem]">
           <div className="text-lg font-semibold text-amber-300">Teacher notes</div>
           <p className="mt-2 text-lg leading-snug">{step.teacher}</p>
+          <label className="mt-3 block text-base text-slate-300">
+            Assist style
+            <select
+              data-testid="teacher-assist"
+              className="mt-1 w-full rounded border border-slate-500 bg-slate-950 p-2 text-lg"
+              value={assist}
+              onChange={(e) => onAssist(e.target.value as AssistStyle)}
+            >
+              <option value="all">All combined</option>
+              <option value="arrow">Animated arrow</option>
+              <option value="highlighter">Highlighter</option>
+              <option value="blinker">Blinker</option>
+              <option value="spotlight">Spotlight</option>
+              <option value="off">Off</option>
+            </select>
+          </label>
           <label className="mt-3 flex items-center gap-2 text-lg">
             <input type="checkbox" checked={freeExplore} onChange={(e) => setFreeExplore(e.target.checked)} />
             Free explore — jump without moving the class screen
           </label>
           <label className="mt-3 block text-base text-slate-300">Jump to a step</label>
           <select
+            data-testid="teacher-jump"
             className="mt-1 w-full rounded border border-slate-500 bg-slate-950 p-2 text-lg"
             value={step.id}
             onChange={(e) => goTo(STEPS.findIndex((s) => s.id === e.target.value))}
@@ -216,7 +286,7 @@ export const GuideProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         </div>
       )}
 
-      <div className="fixed bottom-0 left-0 right-0 z-[70] flex items-center justify-between gap-3 border-t border-sky-700 bg-slate-950 px-4 py-3 text-slate-50">
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex items-center justify-between gap-3 border-t border-sky-700 bg-slate-950 px-4 py-3 text-slate-50">
         <button
           type="button"
           onClick={() => goTo(index - 1)}
