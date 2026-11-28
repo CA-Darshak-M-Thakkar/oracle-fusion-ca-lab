@@ -1,16 +1,16 @@
 import { GLAccount } from '../types/erp';
 
 export const COMPANY = {
-  legalEntity: 'ABC Limited',
-  bu: 'ABC Mumbai Business Unit',
+  legalEntity: 'ABC Ltd',
+  bu: 'ABC Rajkot Business Unit',
   ledger: 'ABC India Primary Ledger',
   currency: 'INR',
-  gstin: '27AABCA1234F1Z5',
-  state: 'Maharashtra',
-  address: '401, Trade Centre, Andheri East, Mumbai, Maharashtra 400069',
-  shipTo: 'ABC Warehouse, Bhiwandi, Maharashtra 421302',
-  billTo: 'ABC Limited, Andheri East, Mumbai 400069',
-  invOrg: 'ABC Mumbai Stores',
+  gstin: '24AABCA1234A1Z5',
+  state: 'Gujarat',
+  address: '101 Shivam Complex, Kalawad Road, Rajkot, Gujarat 360005',
+  shipTo: 'ABC Warehouse, Rajkot, Gujarat 360005',
+  billTo: 'ABC Ltd, 101 Shivam Complex, Kalawad Road, Rajkot 360005',
+  invOrg: 'ABC Rajkot Stores',
   bank: 'HDFC Bank — ABC Current Account',
   paymentProfile: 'ABC NEFT Profile',
 };

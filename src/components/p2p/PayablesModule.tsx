@@ -71,7 +71,7 @@ export const PayablesModule: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-[12.5px]">
             <div>
               <label className="block font-medium mb-1">Business Unit</label>
-              <input readOnly value="ABC Mumbai Business Unit" className="w-full oracle-input bg-[#F4F6F9]" />
+              <input readOnly value="ABC Rajkot Business Unit" className="w-full oracle-input bg-[#F4F6F9]" />
             </div>
             <div>
               <label className="block font-medium mb-1">* Identifying PO (for 3-Way Match)</label>
@@ -196,7 +196,7 @@ export const PayablesModule: React.FC = () => {
             <div className="space-y-3">
               <div className="grid grid-cols-3 items-center gap-2">
                 <label className="text-right font-medium">* Business Unit</label>
-                <input readOnly value="ABC Mumbai Business Unit" className="col-span-2 oracle-input bg-[#F4F6F9]" />
+                <input readOnly value="ABC Rajkot Business Unit" className="col-span-2 oracle-input bg-[#F4F6F9]" />
               </div>
               <div className="grid grid-cols-3 items-center gap-2">
                 <label className="text-right font-medium">* Supplier or Party</label>

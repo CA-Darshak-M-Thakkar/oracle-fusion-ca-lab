@@ -1,0 +1,519 @@
+# Oracle Fusion Cloud counterpart of every EBS screen. Merged into screens[].fusion by build.py (key = screen id).
+# Click paths follow the lab's own Navigator (src/components/NavigatorDrawer.tsx): Navigator > group > work area, then the Tasks panel
+# (the lab shows it as the "More Tasks" menu). Strings may use {{key}} from data.yaml.
+#   kind    home | search | form | dialog | notification | list | report
+#   user    requester | approver | buyer | receiver | apclerk | cashier   (who is signed in)
+#   group   Navigator group that is expanded     area  the work area (page) name      tasks  key of `tasks` below
+#   task    highlighted entry in the Tasks panel (omit when none)
+#   path    click path, one chip per click       press  the button to press (highlighted)     lab  extra tip for the lab
+#   status  [before, after]                      crumbs  breadcrumb override
+navigator:
+  - ["Procurement", ["Purchase Requisitions", "Process Requisitions", "Purchase Orders", "My Receipts"]]
+  - ["Payables", ["Invoices", "Payments"]]
+  - ["Order Management", ["Order Management", "Create Sales Order"]]
+  - ["Supply Chain Execution", ["Inventory Management", "Manage Shipments"]]
+  - ["Receivables", ["Billing", "Accounts Receivable"]]
+  - ["General Accounting", ["General Accounting Dashboard", "Journals"]]
+  - ["Tools", ["Scheduled Processes", "Audit Reports"]]
+tasks:
+  requisitions: ["Request Noncatalog Item", "Manage Requisitions", "Process Requisitions"]
+  processreq: ["Process Requisitions", "Manage Orders", "Create Order"]
+  orders: ["Create Order", "Manage Orders", "Process Requisitions"]
+  receipts: ["Receive Expected Shipments", "Create Receipt", "Manage Receipts"]
+  invoices: ["Create Invoice", "Manage Invoices", "Create Invoice Batch"]
+  payments: ["Create Payment", "Manage Payments", "Submit Payment Process Request"]
+  scheduled: ["Schedule New Process", "Manage Scheduled Processes"]
+  journals: ["Create Journal", "Import Journals", "Manage Journals"]
+users:
+  requester: "Requester"
+  approver: "Approver"
+  buyer: "Buyer"
+  receiver: "Warehouse Receiver"
+  apclerk: "AP Accountant"
+  cashier: "Cashier"
+screens:
+  navigator:
+    kind: home
+    user: requester
+    group: Procurement
+    hl: Purchase Requisitions
+    title: "Home"
+    path: ["Home (springboard)", "Navigator", "Procurement", "Purchase Requisitions"]
+    note: "Fusion has no menu tree like EBS. You open the Navigator (the three-line icon), expand a group and choose the work area."
+  find_requisitions:
+    kind: search
+    user: requester
+    group: Procurement
+    area: "Purchase Requisitions"
+    tasks: requisitions
+    task: "Manage Requisitions"
+    title: "Manage Requisitions"
+    path: ["Navigator", "Procurement", "Purchase Requisitions", "Tasks panel", "Manage Requisitions"]
+    fields: [["Requisition", ""], ["Requester", "{{requester}}"], ["Status", "Any"], ["Business Unit", "{{ou}}"]]
+    actions: ["Reset", "Search"]
+    press: "Search"
+  requisition_form:
+    kind: form
+    user: requester
+    group: Procurement
+    area: "Purchase Requisitions"
+    tasks: requisitions
+    task: "Request Noncatalog Item"
+    title: "Create Noncatalog Request"
+    path: ["Navigator", "Procurement", "Purchase Requisitions", "Tasks panel", "Request Noncatalog Item", "Add to Cart"]
+    fields: [["Item Description", "{{itemdesc}}"], ["Category", "{{category}}"], ["Quantity", "{{qty}}"], ["UOM", "{{uom}}"], ["Price", "{{cur}} {{price}}"], ["Supplier", "{{supplier}}"], ["Deliver-to Organization", "{{orgname}}"], ["Need-by Date", "{{f_need}}"]]
+    actions: ["Cancel", "Save", "Add to Cart"]
+    press: "Add to Cart"
+    status: ["New", "In cart"]
+    note: "Fusion fills a cart first. The requisition number {{req}} is created when you submit the cart (next step)."
+  approve_document_req:
+    kind: form
+    user: requester
+    group: Procurement
+    area: "Purchase Requisitions"
+    tasks: requisitions
+    title: "Review Requisition {{req}}"
+    path: ["Cart icon (top right)", "Review & Submit", "Submit"]
+    fields: [["Requisition", "{{req}}"], ["Requester", "{{requester}}"], ["Total", "{{cur}} {{amount}}"], ["Status", "Incomplete"]]
+    table: {cols: ["Line", "Item", "Qty", "UOM", "Price", "Amount"], rows: [["1", "{{itemdesc}}", "{{qty}}", "{{uom}}", "{{price}}", "{{amount}}"]]}
+    actions: ["Save", "Submit"]
+    press: "Submit"
+    status: ["Incomplete", "Pending approval"]
+    note: "The requester cannot approve their own request. It goes to {{approver}}."
+  workflow_search:
+    kind: notification
+    user: approver
+    area: "Notifications"
+    title: "Notifications"
+    path: ["Bell icon (top right)", "Notifications", "Requisition {{req}} requires your approval"]
+    lab: "In our lab: open your name (top right), choose Approver, then Manage Requisitions."
+    fields: [["From", "{{requester}}"], ["Subject", "Requisition {{req}} requires your approval"], ["Status", "Open"]]
+    actions: ["Reject", "Approve"]
+    note: "There is no separate Workflow Administrator window in Fusion: the approver works from the bell icon."
+  workflow_notification:
+    kind: notification
+    user: approver
+    area: "Notifications"
+    title: "Requisition {{req}}"
+    path: ["Bell icon", "Open the notification", "Approve"]
+    fields: [["Requisition", "{{req}}"], ["Requester", "{{requester}}"], ["Total", "{{cur}} {{amount}}"], ["Status", "Pending approval"]]
+    actions: ["Reject", "Approve"]
+    press: "Approve"
+    status: ["Pending approval", "Approved"]
+    lab: "In our lab: Manage Requisitions > Approve."
+    note: "After Approve the requester sees the status Approved on Manage Requisitions."
+  note_no_data:
+    kind: dialog
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    task: "Process Requisitions"
+    title: "Process Requisitions"
+    path: ["Navigator", "Procurement", "Process Requisitions"]
+    fields: [["Buyer", "{{buyer}}"], ["Requisition", "{{req}}"]]
+    actions: ["Reset", "Search"]
+    note: "No results found means the requisition is not Approved yet, or it has not been assigned to this buyer."
+  find_req_lines_autocreate:
+    kind: search
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    task: "Process Requisitions"
+    title: "Process Requisitions"
+    path: ["Navigator", "Procurement", "Process Requisitions"]
+    fields: [["Requisition", "{{req}}"], ["Buyer", "{{buyer}}"], ["Deliver-to", "{{orgname}}"], ["Business Unit", "{{ou}}"]]
+    actions: ["Reset", "Search"]
+    press: "Search"
+  find_req_lines_buyer:
+    kind: search
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    task: "Process Requisitions"
+    title: "Process Requisitions"
+    path: ["Navigator", "Procurement", "Process Requisitions", "Search (Status = Approved)"]
+    fields: [["Requisition", "{{req}}"], ["Status", "Approved"], ["Buyer", ""]]
+    actions: ["Reset", "Search"]
+    press: "Search"
+  assign_req_lines:
+    kind: form
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    title: "Assign Buyer"
+    path: ["Process Requisitions", "Select the line", "Assign Buyer"]
+    fields: [["Buyer", "{{buyer}}"], ["Item", "{{itemdesc}}"], ["Quantity", "{{qty}}"], ["Amount", "{{cur}} {{amount}}"]]
+    actions: ["Cancel", "Assign"]
+    press: "Assign"
+  forms_message:
+    kind: dialog
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    title: "Confirmation"
+    path: ["Assign", "Confirmation message"]
+    fields: [["Message", "Buyer {{buyer}} assigned to {{req}} line 1"]]
+    actions: ["OK"]
+  autocreate_documents:
+    kind: form
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    task: "Create Order"
+    title: "Document Builder"
+    path: ["Process Requisitions", "Select the line", "Add to Document Builder"]
+    fields: [["Requisition", "{{req}}"], ["Item", "{{itemdesc}}"], ["Quantity", "{{qty}}"], ["Document type", "Standard Purchase Order"]]
+    actions: ["Cancel", "Add to Document Builder"]
+    press: "Add to Document Builder"
+  new_document:
+    kind: dialog
+    user: buyer
+    group: Procurement
+    area: "Process Requisitions"
+    tasks: processreq
+    task: "Create Order"
+    title: "Add to Document Builder"
+    path: ["Add to Document Builder", "OK", "Create"]
+    fields: [["Document type", "Standard Purchase Order"], ["Supplier", "{{supplier}}"], ["Supplier Site", "{{site}}"], ["Buyer", "{{buyer}}"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+    status: ["Approved requisition", "PO {{po}} (Incomplete)"]
+    note: "Create produces the purchase order {{po}}."
+  po_form:
+    kind: form
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    task: "Manage Orders"
+    title: "Edit Order {{po}}"
+    path: ["Navigator", "Procurement", "Purchase Orders", "Tasks panel", "Manage Orders", "{{po}}"]
+    fields: [["Order", "{{po}}"], ["Supplier", "{{supplier}}"], ["Supplier Site", "{{site}}"], ["Buyer", "{{buyer}}"], ["Item", "{{itemdesc}}"], ["Quantity", "{{qty}} {{uom}}"], ["Price", "{{cur}} {{price}}"], ["Payment Terms", "{{terms}}"]]
+    table: {cols: ["Line", "Item", "Qty", "Price", "Amount", "GST 18%", "Total"], rows: [["1", "{{itemdesc}}", "{{qty}}", "{{price}}", "{{amount}}", "{{gst}}", "{{total}}"]]}
+    actions: ["Save", "Submit"]
+    press: "Submit"
+    status: ["Incomplete", "Pending approval"]
+  shipments:
+    kind: form
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    task: "Manage Orders"
+    title: "Edit Order {{po}}: Schedules"
+    path: ["Edit Order {{po}}", "Lines", "Schedules"]
+    fields: [["Ship-to Organization", "{{orgname}}"], ["Quantity", "{{qty}}"], ["Need-by date", "{{f_need}}"], ["Match approval level", "3-Way"]]
+    actions: ["Cancel", "Save"]
+  approve_document_po:
+    kind: dialog
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    title: "Submit Order {{po}}"
+    path: ["Edit Order {{po}}", "Submit", "OK"]
+    fields: [["Order", "{{po}}"], ["Approver", "{{approver}}"], ["Total", "{{cur}} {{total}}"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+    status: ["Pending approval", "Open (approved)"]
+    lab: "In our lab: switch to Approver, open the order, press Approve. The buyer cannot approve it."
+  organizations:
+    kind: dialog
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    task: "Receive Expected Shipments"
+    title: "Select Receiving Organization"
+    path: ["Navigator", "Procurement", "My Receipts"]
+    fields: [["Receiving Organization", "{{orgname}}"], ["Business Unit", "{{ou}}"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+  find_expected_receipts:
+    kind: search
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    task: "Receive Expected Shipments"
+    title: "Search Open Purchase Orders to Receive"
+    path: ["Navigator", "Procurement", "My Receipts"]
+    fields: [["Purchase Order", "{{po}}"], ["Supplier", "{{supplier}}"], ["Item", "{{itemdesc}}"]]
+    actions: ["Reset", "Search"]
+    press: "Search"
+  receipt_header:
+    kind: form
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    title: "Create Receipt: header"
+    path: ["My Receipts", "Search", "Receive"]
+    fields: [["Receipt", "{{rcpt}}"], ["Supplier", "{{supplier}}"], ["Receipt date", "{{f_rcpt}}"], ["Received by", "{{receiver}}"]]
+    actions: ["Cancel", "Next"]
+  receipts:
+    kind: form
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    task: "Create Receipt"
+    title: "Create Receipt {{rcpt}}"
+    path: ["Navigator", "Procurement", "My Receipts", "Receive the chairs"]
+    fields: [["Purchase Order", "{{po}}"], ["Item", "{{itemdesc}}"], ["Ordered", "{{qty}}"], ["Quantity to receive", "{{qty}}"], ["Receipt", "{{rcpt}}"]]
+    actions: ["Cancel", "Save and Close", "Submit"]
+    press: "Submit"
+    status: ["Open, nothing received", "Received {{qty}} of {{qty}}"]
+  find_receiving_tx:
+    kind: search
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    task: "Manage Receipts"
+    title: "Manage Receipts"
+    path: ["Navigator", "Procurement", "My Receipts", "Tasks panel", "Manage Receipts"]
+    fields: [["Receipt", "{{rcpt}}"], ["Purchase Order", "{{po}}"]]
+    actions: ["Reset", "Search"]
+    press: "Search"
+  receiving_tx:
+    kind: form
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    task: "Manage Receipts"
+    title: "Manage Receipts"
+    path: ["Manage Receipts", "Select {{rcpt}}", "Inspect"]
+    fields: [["Receipt", "{{rcpt}}"], ["Item", "{{itemdesc}}"], ["Inspection status", "Not Inspected"], ["Quantity", "{{qty}}"]]
+    actions: ["Cancel", "Inspect"]
+    press: "Inspect"
+  inspect_dialog:
+    kind: dialog
+    user: receiver
+    group: Procurement
+    area: "My Receipts"
+    tasks: receipts
+    task: "Manage Receipts"
+    title: "Inspect"
+    path: ["Manage Receipts", "Inspect", "Quality code Excellent", "Save"]
+    fields: [["Quantity", "{{qty}}"], ["Quality code", "Excellent"], ["Receipt", "{{rcpt}}"]]
+    actions: ["Cancel", "Save"]
+    press: "Save"
+    status: ["Not Inspected", "Accepted {{qty}}"]
+  invoice_workbench:
+    kind: form
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Create Invoice"
+    title: "Create Invoice"
+    path: ["Navigator", "Payables", "Invoices", "Tasks panel", "Create Invoice"]
+    fields: [["Business Unit", "{{ou}}"], ["Supplier", "{{supplier}}"], ["Supplier Site", "{{site}}"], ["Number", "{{invno}}"], ["Amount", "{{cur}} {{total}}"], ["Invoice Date", "{{f_inv}}"], ["Purchase order", "{{po}}"], ["Payment Terms", "{{terms}}"]]
+    actions: ["Cancel", "Save", "Submit"]
+    status: ["New", "Never validated"]
+  invoice_match_action:
+    kind: form
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Create Invoice"
+    title: "Create Invoice: match"
+    path: ["Create Invoice", "Match to", "Receipt ({{rcpt}})"]
+    fields: [["Match to", "Receipt"], ["Purchase order", "{{po}}"], ["Receipt", "{{rcpt}}"]]
+    actions: ["Cancel", "Match"]
+    press: "Match"
+  invoice_lines:
+    kind: form
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Create Invoice"
+    title: "Create Invoice: Lines"
+    path: ["Create Invoice", "Lines"]
+    table: {cols: ["Line", "Type", "Description", "Amount"], rows: [["1", "Item", "{{itemdesc}}", "{{amount}}"], ["2", "Tax", "IGST 18%", "{{igst}}"]]}
+    fields: [["Invoice total", "{{cur}} {{total}}"]]
+    actions: ["Cancel", "Save"]
+    note: "Item {{amount}} + IGST 18% {{igst}} = {{total}}. Interstate supply."
+  find_receipts_match:
+    kind: search
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Create Invoice"
+    title: "Select Purchase Order or Receipt to match"
+    path: ["Create Invoice", "Lines", "Match", "Purchase order / Receipt"]
+    fields: [["Match to", "Receipt"], ["Purchase Order", "{{po}}"], ["Receipt", "{{rcpt}}"], ["Supplier", "{{supplier}}"]]
+    actions: ["Cancel", "Search"]
+    press: "Search"
+  match_to_receipts:
+    kind: form
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Create Invoice"
+    title: "Match to Receipts"
+    path: ["Create Invoice", "Lines", "Match", "Tick {{rcpt}}", "Match"]
+    fields: [["Receipt", "{{rcpt}}"], ["Quantity invoiced", "{{qty}}"], ["Unit price", "{{cur}} {{price}}"], ["Match amount", "{{cur}} {{amount}}"]]
+    actions: ["Cancel", "Match"]
+    press: "Match"
+  invoice_actions:
+    kind: dialog
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Manage Invoices"
+    title: "Actions: Validate"
+    path: ["Navigator", "Payables", "Invoices", "Tasks panel", "Manage Invoices", "{{invno}}", "Actions", "Validate"]
+    fields: [["Invoice", "{{invno}}"], ["Amount", "{{cur}} {{total}}"], ["Action", "Validate"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+    status: ["Never validated", "Validated"]
+    note: "Validation checks the match to the PO and the receipt (3-way match). No hold means it can be paid."
+  payments:
+    kind: form
+    user: cashier
+    group: Payables
+    area: "Payments"
+    tasks: payments
+    task: "Create Payment"
+    title: "Create Payment"
+    path: ["Navigator", "Payables", "Payments", "Tasks panel", "Create Payment"]
+    fields: [["Business Unit", "{{ou}}"], ["Supplier", "{{supplier}}"], ["Payment Date", "{{f_pay}}"], ["Payment Method", "{{method}}"], ["Process Profile", "{{profile}}"], ["Bank Account", "{{bank}}"]]
+    actions: ["Cancel", "Save and Close"]
+    status: ["New", "Payment {{payno}}"]
+  payment_actions:
+    kind: dialog
+    user: cashier
+    group: Payables
+    area: "Payments"
+    tasks: payments
+    task: "Manage Payments"
+    title: "Actions: Print Remittance Advice"
+    path: ["Payments", "Manage Payments", "{{payno}}", "Actions", "Print Remittance Advice"]
+    fields: [["Payment", "{{payno}}"], ["Program", "Separate Remittance Advice"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+  select_invoices:
+    kind: form
+    user: cashier
+    group: Payables
+    area: "Payments"
+    tasks: payments
+    task: "Create Payment"
+    title: "Select Invoices to pay"
+    path: ["Payments", "Create Payment", "Select invoice {{invno}}", "Submit"]
+    fields: [["Supplier", "{{supplier}}"], ["Invoice", "{{invno}}"], ["Amount to pay", "{{cur}} {{pay}}"], ["Discount taken", "{{cur}} {{disc}}"]]
+    actions: ["Cancel", "Submit"]
+    press: "Submit"
+    status: ["Validated, unpaid", "Paid"]
+    note: "No early-payment discount in our example: you pay the full {{cur}} {{pay}} on the due date ({{f_due}})."
+  requests_payment:
+    kind: list
+    user: cashier
+    group: Tools
+    area: "Scheduled Processes"
+    tasks: scheduled
+    task: "Manage Scheduled Processes"
+    title: "Scheduled Processes"
+    path: ["Navigator", "Tools", "Scheduled Processes"]
+    table: {cols: ["Process ID", "Name", "Status"], rows: [["{{r5}}", "Send Separate Remittance Advice", "Succeeded"], ["{{r4}}", "Record Print Status", "Succeeded"], ["{{r3}}", "Format Payment Instructions", "Succeeded"]]}
+    actions: ["Refresh"]
+    note: "Fusion runs the same payment processes. They should all show Succeeded."
+  requests:
+    kind: list
+    user: apclerk
+    group: Tools
+    area: "Scheduled Processes"
+    tasks: scheduled
+    task: "Manage Scheduled Processes"
+    title: "Scheduled Processes"
+    path: ["Navigator", "Tools", "Scheduled Processes"]
+    table: {cols: ["Process ID", "Name", "Status"], rows: [["{{r7}}", "Import Journals", "Succeeded"], ["{{r6}}", "Create Accounting", "Succeeded"], ["{{r5}}", "Send Separate Remittance Advice", "Succeeded"]]}
+    actions: ["Refresh"]
+    note: "Create Accounting ({{r6}}) then Import Journals ({{r7}}): find the batch {{gl_batch}} in General Ledger."
+  journal_import_report:
+    kind: report
+    user: apclerk
+    group: Tools
+    area: "Scheduled Processes"
+    tasks: scheduled
+    title: "Import Journals: output"
+    path: ["Scheduled Processes", "Import Journals ({{r7}})", "View Output"]
+    fields: [["Source", "Payables"], ["Batch name", "{{gl_batch}}"], ["Journal lines", "3"], ["Debits / Credits", "{{cur}} {{total}} / {{cur}} {{total}}"]]
+    actions: ["Close"]
+    note: "The batch name is how you find the journal in General Accounting > Journals."
+  invoice_actions_gl:
+    kind: dialog
+    user: apclerk
+    group: Payables
+    area: "Invoices"
+    tasks: invoices
+    task: "Manage Invoices"
+    title: "Create Accounting"
+    path: ["Navigator", "Payables", "Invoices", "Tasks panel", "Manage Invoices", "{{invno}}", "Actions", "Create Accounting"]
+    fields: [["Invoice", "{{invno}}"], ["Mode", "Final Post"], ["Ledger", "{{ledger}}"], ["Transfer to General Ledger", "Yes"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+    status: ["Unaccounted", "Accounted"]
+    note: "Accounting: Dr GR/IR {{amount}}, Dr Input IGST {{igst}}, Cr Accounts Payable {{total}}."
+  find_purchase_orders:
+    kind: search
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    task: "Manage Orders"
+    title: "Manage Orders"
+    path: ["Navigator", "Procurement", "Purchase Orders", "Tasks panel", "Manage Orders"]
+    fields: [["Order", "{{po}}"], ["Supplier", "{{supplier}}"], ["Status", "Open"]]
+    actions: ["Reset", "Search"]
+    press: "Search"
+  po_headers:
+    kind: list
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    task: "Manage Orders"
+    title: "Manage Orders: results"
+    path: ["Manage Orders", "Search", "{{po}}"]
+    table: {cols: ["Order", "Supplier", "Status", "Total"], rows: [["{{po}}", "{{supplier}}", "Open", "{{cur}} {{total}}"]]}
+    actions: ["Actions"]
+  po_lines_tools:
+    kind: list
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    task: "Manage Orders"
+    title: "Order {{po}}: Lines"
+    path: ["Manage Orders", "{{po}}", "Actions", "Manage Document Actions"]
+    table: {cols: ["Line", "Item", "Qty", "Price", "Amount"], rows: [["1", "{{itemdesc}}", "{{qty}}", "{{price}}", "{{amount}}"]]}
+    actions: ["Actions"]
+    press: "Actions"
+  control_document:
+    kind: dialog
+    user: buyer
+    group: Procurement
+    area: "Purchase Orders"
+    tasks: orders
+    task: "Manage Orders"
+    title: "Manage Document Actions"
+    path: ["Manage Orders", "{{po}}", "Actions", "Manage Document Actions", "Close", "OK"]
+    fields: [["Order", "{{po}}"], ["Action", "Close"], ["Reason", "Received and paid in full"]]
+    actions: ["Cancel", "OK"]
+    press: "OK"
+    status: ["Open", "Closed"]

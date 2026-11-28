@@ -319,7 +319,7 @@ export const ScheduledProcessesModule: React.FC = () => {
                 </select>
               </div>
               <div className="p-3 bg-[#F8FAFC] border rounded text-[12px] text-[#5E5852]">
-                Parameters: Ledger = <strong>ABC India Primary Ledger</strong> | Business Unit = <strong>ABC Mumbai Business Unit</strong>
+                Parameters: Ledger = <strong>ABC India Primary Ledger</strong> | Business Unit = <strong>ABC Rajkot Business Unit</strong>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">

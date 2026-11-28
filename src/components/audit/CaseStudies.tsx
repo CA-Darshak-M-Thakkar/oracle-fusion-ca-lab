@@ -38,7 +38,7 @@ export const CaseStudies: React.FC = () => {
     <div className="space-y-4">
       <div className="flex flex-wrap gap-2">
         {[
-          ['91', 'Case 9.1 · ABC Limited paper'],
+          ['91', 'Case 9.1 · ABC Ltd paper'],
           ['92', 'Case 9.2 · Company ABC'],
           ['lmn', 'Company LMN'],
           ['extra', 'Extra classroom cases'],
@@ -51,7 +51,7 @@ export const CaseStudies: React.FC = () => {
 
       {tab === '91' && (
         <div className="oracle-panel space-y-4 p-5">
-          <h3 className="text-2xl font-semibold">Case 9.1 — ABC Limited, procure to pay</h3>
+          <h3 className="text-2xl font-semibold">Case 9.1 — ABC Ltd, procure to pay</h3>
           <p className="text-lg leading-snug">
             {COMPANY.legalEntity} counts the A4 paper in the store and the quantity in the system does not match. You are the CA. Use the inquiries below. Do not skip to a finished answer.
           </p>

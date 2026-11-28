@@ -14,7 +14,7 @@ export const BankReconciliationModule: React.FC = () => {
     >
       <div className="oracle-panel p-5 space-y-4">
         <p className="text-lg leading-snug">
-          ABC Limited’s bank statement is below. The ₹10,000 from Mehta Stores is receipt RCPT-501. It is unapplied, but it is already in the cash book.
+          ABC Ltd’s bank statement is below. The ₹10,000 from Mehta Stores is receipt RCPT-501. It is unapplied, but it is already in the cash book.
         </p>
         <table className="w-full text-left">
           <thead className="oracle-table-header">

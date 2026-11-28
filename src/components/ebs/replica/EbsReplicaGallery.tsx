@@ -27,7 +27,7 @@ export const EbsReplicaGallery: React.FC = () => {
         Left: the older E-Business Suite R12 screen, rebuilt from the P2P manual (<b>{THEME.labels.ebs}</b>). Right: the matching screen in <b>{THEME.labels.fusion}</b>, which is what the ICAI syllabus teaches. The classes use Fusion; the EBS screens help students who meet the old system at clients.
       </p>
       <div style={{ display: 'flex', gap: 8, margin: '10px 0 18px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 14 }}>One set of dummy data everywhere: <b>ABC Ltd</b>, Sharma Traders, 10 Office Chairs × ₹5,000 = ₹50,000 + 18% GST = ₹59,000.</span>
+        <span style={{ fontSize: 14 }}>One set of dummy data everywhere: <b>ABC Ltd</b>, Sharma Traders, 10 Office Chairs × ₹5,000 = ₹50,000 + 18% IGST (interstate: Mumbai to Rajkot) = ₹59,000. GSTINs and addresses are dummy teaching data.</span>
         <span style={{ marginLeft: 'auto', fontSize: 12, color: '#6b6560' }}>generated from p2p-source ({(hashInfo as any).sourceHash}, {(hashInfo as any).screens} screens)</span>
       </div>
       {SCREENS.map((s) => (

@@ -90,14 +90,14 @@ export const STEPS: GuideStep[] = [
     id: 'ori-sim',
     moduleId: 'orientation',
     title: 'This is a practice company',
-    plain: 'Nothing here is the real Oracle cloud. The company is ABC Limited, Mumbai. Money is in rupees. GSTIN 27AABCA1234F1Z5. The goods are ordinary: Laptop, Office Chair, A4 paper, Printer.',
+    plain: 'Nothing here is the real Oracle cloud. The company is ABC Ltd, Rajkot, Gujarat. Money is in rupees. GSTIN 24AABCA1234A1Z5 (dummy teaching data). The goods are ordinary: Laptop, Office Chair, A4 paper, Printer.',
     teacher: 'Tell them the numbers are round on purpose so they can follow Dr and Cr aloud.',
     route: 'orientation',
     coach: ['guide-next'],
     coachText: 'Press Next.',
     completeOn: 'next',
     bubble: b(
-      'You know this is practice data for ABC Limited.',
+      'You know this is practice data for ABC Ltd.',
       'A simulator lets the class post entries without touching a client.',
       'No entry.',
       'Do not quote these balances as a real company’s results.'
@@ -361,7 +361,7 @@ export const STEPS: GuideStep[] = [
     id: 'p2p-invoice',
     moduleId: 'p2p',
     title: 'Enter a bill that matches',
-    plain: 'Press Create the matching bill (BILL-401). It bills exactly 10 chairs at ₹5,000. GST is 18% (CGST ₹4,500 + SGST ₹4,500). The bill total is ₹59,000.',
+    plain: 'Press Create the matching bill (BILL-401). It bills exactly 10 chairs at ₹5,000. Sharma Traders is in Maharashtra and ABC is in Gujarat, so this is an interstate sale: GST is IGST 18% = ₹9,000. The bill total is ₹59,000.',
     teacher: 'If they change the quantity, the bill goes on hold and cannot be paid. Show PAPER-100 later as the bad example.',
     route: 'payables_invoices',
     coach: ['quick-match-invoice'],
@@ -370,7 +370,7 @@ export const STEPS: GuideStep[] = [
     bubble: b(
       'The bill matched the order and the receipt.',
       'We now owe Sharma Traders. GR/IR is cleared.',
-      'Dr GR/IR ₹50,000, Dr Input CGST ₹4,500, Dr Input SGST ₹4,500, Cr Accounts Payable ₹59,000.',
+      'Dr GR/IR ₹50,000, Dr Input IGST ₹9,000, Cr Accounts Payable ₹59,000.',
       'A bill for 100 when only 80 arrived must stay on hold. Input GST is claimed only on a valid tax invoice for goods actually received.'
     ),
   },
@@ -449,7 +449,7 @@ export const STEPS: GuideStep[] = [
     id: 'o2c-ship',
     moduleId: 'o2c',
     title: 'Ship and raise the invoice',
-    plain: 'Press Ship Confirm. The customer now has the laptops. That is when revenue is recorded. GST is CGST ₹9,000 + SGST ₹9,000 because Mehta Stores is in Maharashtra. Cost is ₹40,000 × 2 = ₹80,000.',
+    plain: 'Press Ship Confirm. The customer now has the laptops. That is when revenue is recorded. GST is CGST ₹9,000 + SGST ₹9,000 because Mehta Stores is in Gujarat, the same state as ABC. Cost is ₹40,000 × 2 = ₹80,000.',
     teacher: 'Say Ind AS 115, not AS 9. Control has passed. Show the packing slip and the bill of lading.',
     route: 'edit_shipment',
     coach: ['ship-confirm'],
@@ -459,7 +459,7 @@ export const STEPS: GuideStep[] = [
       'You shipped 2 laptops.',
       'Revenue is recorded when the customer controls the goods, not when we feel like invoicing.',
       'Dr Accounts Receivable ₹1,18,000, Cr Sales ₹1,00,000, Cr Output CGST ₹9,000, Cr Output SGST ₹9,000. And Dr Cost of Goods Sold ₹80,000, Cr Inventory ₹80,000.',
-      'Invoice date alone does not prove the period. Dispatch, packing slip and bill of lading do. A Gujarat customer would have IGST instead of CGST and SGST.'
+      'Invoice date alone does not prove the period. Dispatch, packing slip and bill of lading do. A customer in another state, such as Maharashtra, would have IGST instead of CGST and SGST.'
     ),
   },
   {
@@ -629,8 +629,8 @@ export const STEPS: GuideStep[] = [
   {
     id: 'aud-91',
     moduleId: 'audit',
-    title: 'Case 9.1 — ABC Limited and the paper',
-    plain: 'ABC Limited’s physical paper does not match the system. Do not skip to a conclusion. Open Item Movement for A4 Paper Ream. Compare the order, the receipt, the bill and the write-off.',
+    title: 'Case 9.1 — ABC Ltd and the paper',
+    plain: 'ABC Ltd’s physical paper does not match the system. Do not skip to a conclusion. Open Item Movement for A4 Paper Ream. Compare the order, the receipt, the bill and the write-off.',
     teacher: 'Let them look. The bill is 100 reams, the receipt is 80, and 10 reams were written off with no paper. Say that only after they have opened the inquiry.',
     route: 'ca_audit_lab',
     coach: ['item-movement'],
@@ -647,7 +647,7 @@ export const STEPS: GuideStep[] = [
     id: 'aud-92',
     moduleId: 'audit',
     title: 'Case 9.2 — Company ABC’s collections',
-    plain: 'Company ABC sells electronics and is slow to collect. Here the goods are laptops, so the amounts stay simple. Open the packing slip and bill of lading. Also notice Mehta’s 10% discount, Shah’s overdue bills, and Desai Traders in Gujarat (IGST, not CGST).',
+    plain: 'Company ABC sells electronics and is slow to collect. Here the goods are laptops, so the amounts stay simple. Open the packing slip and bill of lading. Also notice Mehta’s 10% discount, Shah’s overdue bills, and Desai Traders in Maharashtra (IGST, not CGST).',
     teacher: 'Title the case Company ABC, as in the PDF. Do not read out a finished answer first.',
     route: 'ca_audit_lab',
     coach: ['open-shipping-doc'],

@@ -1,6 +1,6 @@
 # Oracle Fusion practice company (CA classroom)
 
-A browser simulator of Oracle Fusion Cloud ERP for Chartered Accountancy students who have never seen an ERP. It is **not** the real Oracle cloud. The practice company is **ABC Limited, Mumbai**, in rupees.
+A browser simulator of Oracle Fusion Cloud ERP for Chartered Accountancy students who have never seen an ERP. It is **not** the real Oracle cloud. The practice company is **ABC Ltd, Rajkot**, in rupees.
 
 The goods are everyday items so the class can follow the money:
 
@@ -81,6 +81,16 @@ npm run build
 Copy the contents of `dist/` onto the `gh-pages` branch and push that branch. `vite.config.ts` uses `base: './'` so the pages site can live in a project subpath.
 
 Refresh the hash in the address bar to stay on the same lab step (`#payables_invoices|step=p2p-invoice`).
+
+## Source of truth (EBS and Fusion P2P screens)
+
+The 40 EBS R12 replica screens, their Fusion Cloud pairs and the ABC dataset are generated from `p2p-source/` (YAML). The generated files are `src/data/ebs/*.json`. Do not edit them by hand.
+
+```bash
+cd p2p-source && ./sync.sh     # regenerate the screens and check the site builds
+```
+
+The same folder is kept on the teacher's PC at `D:\ITT Adv ITT\02 Oracle Fusion Course\10 Source of Truth`, next to the guide PDF and the P2P classroom PPT that are built from it (`p2p-source/tools/`). The screen gallery is the site address plus `#ebs-replica`. The company is dummy teaching data: ABC Ltd, Rajkot, with an interstate supplier in Mumbai, so purchases carry IGST.
 
 ## What the books do
 

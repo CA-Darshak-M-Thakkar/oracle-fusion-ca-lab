@@ -1,0 +1,158 @@
+# Tutor quick guide content (dark PDF). Strings may use {{key}} from data.yaml. Manual pages are computed from p2p.yaml (screens listed in `screens`).
+title: "Procure to Pay: tutor quick guide"
+subtitle: "Oracle Fusion Cloud (current system) and EBS R12 (older system), one example: {{companyShort}} buys {{qty}} {{itemdesc}}s"
+flow:   # the general flow, Part 1
+  - {n: 1, name: "Requisition", who: "{{requester}}", role: "Requester", module: "Purchasing", doc: "{{req}}"}
+  - {n: 2, name: "Approval", who: "{{approver}}", role: "Approver", module: "Purchasing (approvals)", doc: "{{req}} Approved"}
+  - {n: 3, name: "Purchase Order", who: "{{buyer}}", role: "Buyer", module: "Purchasing", doc: "{{po}}"}
+  - {n: 5, name: "Receipt / Inspection", who: "{{receiver}}", role: "Warehouse Receiver", module: "Receiving, Inventory", doc: "{{rcpt}}"}
+  - {n: 7, name: "Invoice", who: "{{apclerk}}", role: "AP Accountant", module: "Payables", doc: "{{invno}}"}
+  - {n: 8, name: "Payment", who: "{{cashier}}", role: "Cashier", module: "Payables (Payments)", doc: "{{payno}}"}
+  - {n: 9, name: "Accounting / GL", who: "{{apclerk}}", role: "AP Accountant", module: "Subledger Accounting, General Ledger", doc: "Batch {{gl_batch}}"}
+  - {n: 10, name: "Close", who: "{{buyer}}", role: "Buyer", module: "Purchasing", doc: "{{po}} Closed"}
+flowNotes:
+  - "Steps 3 and 4 are both about the purchase order: create it, then approve it. Steps 5 and 6 are receive and inspect."
+  - "Three different people: the one who asks cannot approve, the one who orders cannot approve the order, the one who types the bill cannot pay it."
+  - "Order of numbers: {{req}} → {{po}} → {{rcpt}} → {{invno}} → {{payno}}. Each document carries the number of the one before it."
+accounting:
+  - ["Receipt {{rcpt}}", "Dr Receiving Inspection {{amountsh}} / Cr AP Accrual (GR/IR) {{amountsh}}", "then into stock: Dr Inventory {{amountsh}} / Cr Receiving Inspection {{amountsh}}"]
+  - ["Invoice {{invno}}", "Dr GR/IR {{amountsh}} + Dr Input IGST {{igst}}", "Cr Accounts Payable {{totalsh}}"]
+  - ["Payment {{payno}}", "Dr Accounts Payable {{totalsh}}", "Cr Bank (HDFC) {{totalsh}}"]
+steps:
+  - n: 1
+    title: "Create the requisition"
+    who: "{{requester}} (Requester)"
+    module: "Purchasing (Self Service Procurement)"
+    date: "{{f_req}}"
+    purpose: "Ask the company, inside the company, for {{qty}} chairs. Nothing is sent to the supplier yet."
+    ebs: ["Purchasing responsibility", "Requisitions", "Requisition Summary", "New"]
+    fusion: ["Navigator", "Procurement", "Purchase Requisitions", "Tasks", "Request Noncatalog Item", "Add to Cart"]
+    lab: "The lab calls the Tasks panel 'More Tasks'."
+    fields: [["Company", "{{company}}"], ["Business unit", "{{ou}}"], ["Requester", "{{requester}}"], ["Item", "{{itemdesc}} ({{category}})"], ["Quantity", "{{qty}} {{uom}}"], ["Price", "₹{{price}}"], ["Amount", "₹{{amount}} + GST later"], ["Supplier", "{{supplier}}"], ["Deliver-to org", "{{orgname}}"], ["Need-by", "{{f_need}}"]]
+    button: ["EBS: File → Save", "Fusion: Add to Cart, then Review & Submit"]
+    status: ["(new)", "Incomplete"]
+    number: ["{{req}}", "Approval (step 2) and AutoCreate / Process Requisitions (step 3)."]
+    screens: [navigator, find_requisitions, requisition_form]
+  - n: 2
+    title: "Approve the requisition"
+    who: "{{requester}} submits, {{approver}} (Approver) approves"
+    module: "Purchasing (approvals, workflow)"
+    date: "{{f_req}}"
+    purpose: "A different person checks the request. The requester cannot approve their own."
+    ebs: ["Requisition Summary", "Approve...", "Approve Document", "OK"]
+    fusion: ["Cart", "Review & Submit", "Submit", "then {{approver}}: Bell icon", "Notifications", "Approve"]
+    lab: "Lab: switch role to Approver, Manage Requisitions, Approve."
+    fields: [["Requisition", "{{req}}"], ["Requester", "{{requester}}"], ["Approver", "{{approver}}"], ["Total", "₹{{amount}}"], ["Date", "{{f_req}}"]]
+    button: ["EBS: Approve... then OK", "Fusion: Submit (requester), Approve (approver)"]
+    status: ["Incomplete", "Pending approval", "Approved"]
+    number: ["No new number", "{{req}} stays the same. Step 3 can now pick it up."]
+    screens: [approve_document_req, workflow_search, workflow_notification]
+  - n: 3
+    title: "Create the purchase order"
+    who: "{{buyer}} (Buyer)"
+    module: "Purchasing (AutoCreate / Process Requisitions)"
+    date: "{{f_po}}"
+    purpose: "Turn the approved request into an order to {{supplier}}. The order is the promise: item, quantity, price."
+    ebs: ["Purchasing responsibility", "AutoCreate", "Find {{req}}", "select line", "Automatic", "Create"]
+    fusion: ["Navigator", "Procurement", "Process Requisitions", "search {{req}}", "select the line", "Add to Document Builder", "OK", "Create"]
+    lab: "Lab: switch role to Buyer."
+    fields: [["Requisition", "{{req}}"], ["Buyer", "{{buyer}}"], ["Document type", "Standard Purchase Order"], ["Supplier", "{{supplier}}, {{site}}"], ["Item", "{{itemdesc}}"], ["Quantity", "{{qty}} {{uom}}"], ["Price", "₹{{price}}"], ["Amount", "₹{{amount}}"], ["Ship-to", "{{shipto}}"], ["Terms", "{{terms}}"]]
+    button: ["EBS: Create (AutoCreate Documents)", "Fusion: Create"]
+    status: ["{{req}} Approved", "{{po}} Incomplete"]
+    number: ["{{po}}", "Approve it (step 4), receive against it (step 5), match the bill to it (step 7), close it (step 10)."]
+    screens: [note_no_data, find_req_lines_autocreate, find_req_lines_buyer, assign_req_lines, forms_message, autocreate_documents, new_document]
+  - n: 4
+    title: "Approve the purchase order"
+    who: "{{buyer}} submits, {{approver}} (Approver) approves"
+    module: "Purchasing"
+    date: "{{f_po}}"
+    purpose: "The order only becomes binding when approved. Check the ship-to organisation and the need-by date first."
+    ebs: ["Purchase Order form", "Shipments (check)", "Approve...", "Approve Document", "OK"]
+    fusion: ["Navigator", "Procurement", "Purchase Orders", "Tasks", "Manage Orders", "{{po}}", "Submit"]
+    lab: "Lab: Buyer presses Submit, then switch to Approver and press Approve."
+    fields: [["Purchase order", "{{po}}"], ["Supplier", "{{supplier}}"], ["Buyer", "{{buyer}}"], ["Item and quantity", "{{itemdesc}}, {{qty}} {{uom}}"], ["Amount", "₹{{amount}}"], ["IGST 18% (interstate)", "₹{{igst}}"], ["Order total", "₹{{total}}"], ["Ship-to org", "{{orgname}}"], ["Need-by", "{{f_need}}"]]
+    button: ["EBS: Approve... then OK", "Fusion: Submit, then Approve by the approver"]
+    status: ["Incomplete", "Pending approval", "Approved (Open)"]
+    number: ["No new number", "{{po}} is now Open. The warehouse can receive."]
+    screens: [po_form, shipments, approve_document_po]
+  - n: 5
+    title: "Receive the goods"
+    who: "{{receiver}} (Warehouse Receiver)"
+    module: "Receiving, Inventory"
+    date: "{{f_rcpt}}"
+    purpose: "The chairs arrive. Record what was really received, against the purchase order."
+    ebs: ["Purchasing (receiving)", "Receiving", "Receipts", "choose org {{org}}", "Find PO {{po}}", "Header", "Receive qty", "Save"]
+    fusion: ["Navigator", "Procurement", "My Receipts", "search {{po}}", "Receive the chairs", "Submit"]
+    lab: "Lab: switch role to Warehouse Receiver."
+    fields: [["Receiving org", "{{orgname}} ({{org}})"], ["Purchase order", "{{po}}"], ["Supplier", "{{supplier}}"], ["Item", "{{itemdesc}}"], ["Ordered", "{{qty}} {{uom}}"], ["Received now", "{{qty}} {{uom}}"], ["Receipt date", "{{f_rcpt}}"], ["Received by", "{{receiver}}"]]
+    button: ["EBS: File → Save", "Fusion: Submit"]
+    status: ["{{po}}: 0 of {{qty}} received", "{{qty}} of {{qty}} received"]
+    number: ["{{rcpt}}", "The invoice is matched to this receipt (step 7). Entry: Dr Receiving Inspection / Cr GR/IR ₹{{amountsh}}."]
+    screens: [organizations, find_expected_receipts, receipt_header, receipts]
+  - n: 6
+    title: "Inspect the goods"
+    who: "{{receiver}} (Warehouse Receiver / quality)"
+    module: "Receiving (Receiving Transactions)"
+    date: "{{f_rcpt}}"
+    purpose: "Check quality before the goods go to stock. Optional: the lab receives straight into stock."
+    ebs: ["Receiving", "Receiving Transactions", "Find {{rcpt}}", "tick the line", "Inspect"]
+    fusion: ["Navigator", "Procurement", "My Receipts", "Tasks", "Manage Receipts", "{{rcpt}}", "Inspect"]
+    fields: [["Receipt", "{{rcpt}}"], ["Item", "{{itemdesc}}"], ["Quantity inspected", "{{qty}} {{uom}}"], ["Quality code", "Excellent"], ["Accepted", "{{qty}} {{uom}}"], ["Location", "{{orgname}}"]]
+    button: ["EBS: Inspect, then Save", "Fusion: Inspect, then Save"]
+    status: ["Not Inspected", "Accepted {{qty}}"]
+    number: ["No new number", "{{rcpt}} shows Accepted. The goods are in stock."]
+    screens: [find_receiving_tx, receiving_tx, inspect_dialog]
+  - n: 7
+    title: "Create the payables invoice"
+    who: "{{apclerk}} (AP Accountant)"
+    module: "Payables"
+    date: "{{f_inv}}"
+    purpose: "Record the supplier's bill and match it to the order and the receipt (3-way match). Validate it."
+    ebs: ["Payables responsibility", "Invoice", "Entry", "Invoices", "Match", "Find {{rcpt}}", "tick Match", "Actions...", "Validate", "OK"]
+    fusion: ["Navigator", "Payables", "Invoices", "Tasks", "Create Invoice", "match to receipt", "Save", "Actions", "Validate"]
+    lab: "Lab: switch role to AP Accountant, press Create the matching bill."
+    fields: [["Supplier", "{{supplier}}, site {{site}}"], ["Invoice", "{{invno}}"], ["Invoice date", "{{f_inv}}"], ["Purchase order / receipt", "{{po}} / {{rcpt}}"], ["Quantity x price", "{{qty}} x ₹{{price}}"], ["Item amount", "₹{{amount}}"], ["IGST 18% (interstate)", "₹{{igst}}"], ["Invoice total", "₹{{total}}"], ["Terms / due date", "{{terms}} / {{f_due}}"]]
+    button: ["EBS: Actions... → Validate → OK", "Fusion: Actions → Validate"]
+    status: ["Never Validated", "Validated"]
+    number: ["{{invno}}", "Payment (step 8), accounting (step 9). Dr GR/IR ₹{{amountsh}} + IGST ₹{{igst}}, Cr AP ₹{{totalsh}}."]
+    screens: [invoice_workbench, invoice_match_action, find_receipts_match, match_to_receipts, invoice_lines, invoice_actions]
+  - n: 8
+    title: "Pay the supplier"
+    who: "{{cashier}} (Cashier)"
+    module: "Payables (Payments)"
+    date: "{{f_pay}}"
+    purpose: "Pay the validated invoice on the due date, by NEFT from the company bank account."
+    ebs: ["Payables responsibility", "Payments", "Entry", "Payments", "Enter/Adjust Invoices", "select {{invno}}", "Actions...", "Print Remittance Advice", "OK"]
+    fusion: ["Navigator", "Payables", "Payments", "Tasks", "Create Payment", "select {{invno}}", "Save and Close"]
+    lab: "Lab: switch role to Cashier, press Pay the matched bill."
+    fields: [["Supplier", "{{supplier}}"], ["Invoice", "{{invno}}"], ["Payment method", "{{method}}"], ["Bank account", "{{bank}}"], ["Process profile", "{{profile}}"], ["Payment date", "{{f_pay}}"], ["Amount paid", "₹{{pay}}"], ["Discount", "₹{{disc}} (none)"]]
+    button: ["EBS: Actions... → OK", "Fusion: Save and Close"]
+    status: ["Validated, unpaid", "Paid"]
+    number: ["{{payno}}", "Accounting (step 9). Entry: Dr Accounts Payable ₹{{totalsh}}, Cr Bank ₹{{totalsh}}. Check the three payment requests finished."]
+    screens: [payments, select_invoices, payment_actions, requests_payment]
+  - n: 9
+    title: "Accounting and General Ledger"
+    who: "{{apclerk}} (AP Accountant)"
+    module: "Subledger Accounting, General Ledger"
+    date: "{{f_pay}}"
+    purpose: "Turn the subledger entries into journals in the General Ledger, so they reach the trial balance."
+    ebs: ["Payables responsibility", "Invoices", "query {{invno}}", "Actions...", "Create Accounting", "Final Post", "OK", "View", "Requests"]
+    fusion: ["Navigator", "Tools", "Scheduled Processes", "Create Accounting", "Import Journals", "View Output"]
+    fields: [["Ledger", "{{ledger}}"], ["Period", "{{gl_period}}"], ["Mode", "Final Post"], ["Create Accounting request", "{{r6}}"], ["Journal Import request", "{{r7}}"], ["Batch name", "{{gl_batch}}"], ["Journal lines", "3"], ["Debits = Credits", "₹{{total}}"]]
+    button: ["EBS: Final Post → OK", "Fusion: Submit the process, then View Output"]
+    status: ["Unaccounted", "Accounted and posted"]
+    number: ["{{gl_batch}}", "Search this batch in General Accounting, Journals. It feeds the trial balance."]
+    screens: [invoice_actions_gl, requests, journal_import_report]
+  - n: 10
+    title: "Close the purchase order"
+    who: "{{buyer}} (Buyer)"
+    module: "Purchasing"
+    date: "{{f_pay}}"
+    purpose: "Everything is received and paid. Close the order so nobody can receive or invoice against it again."
+    ebs: ["Purchasing responsibility", "Purchase Orders", "Purchase Order Summary", "Find {{po}}", "Lines", "Tools", "Control", "Finally Close", "OK"]
+    fusion: ["Navigator", "Procurement", "Purchase Orders", "Tasks", "Manage Orders", "{{po}}", "Actions", "Manage Document Actions", "Close"]
+    fields: [["Purchase order", "{{po}}"], ["Supplier", "{{supplier}}"], ["Ordered / received / billed", "{{qty}} / {{qty}} / {{qty}} {{uom}}"], ["Order total", "₹{{total}}"], ["Paid", "₹{{pay}} on {{f_pay}}"], ["Action", "Finally Close"]]
+    button: ["EBS: OK in Control Document", "Fusion: OK in Manage Document Actions"]
+    status: ["Open", "Finally Closed"]
+    number: ["No new number", "{{po}} is closed. This ends the cycle. The next purchase starts again at step 1."]
+    screens: [find_purchase_orders, po_headers, po_lines_tools, control_document]
