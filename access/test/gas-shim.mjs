@@ -3,6 +3,15 @@
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 
+// Like real Sheets (seen live 28-11-2026): typed text such as 28-11-2026 or 2026-11-28 13:43:35 becomes a Date.
+function parse(x) {
+  if (typeof x !== 'string') return x;
+  let m = x.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+  if (m) return new Date(`${m[3]}-${m[2]}-${m[1]}T00:00:00+05:30`);
+  m = x.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+  if (m) return new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}+05:30`);
+  return x;
+}
 class Range {
   constructor(sh, r, c, nr = 1, nc = 1) { Object.assign(this, { sh, r, c, nr, nc }); }
   getValues() { const out = []; for (let i = 0; i < this.nr; i++) { const row = []; for (let j = 0; j < this.nc; j++) row.push(this.sh.get(this.r + i, this.c + j)); out.push(row); } return out; }
@@ -14,9 +23,9 @@ class Range {
 class Sheet {
   constructor(name) { this.name = name; this.rows = []; }
   get(r, c) { return (this.rows[r - 1] || [])[c - 1] ?? ''; }
-  set(r, c, x) { while (this.rows.length < r) this.rows.push([]); this.rows[r - 1][c - 1] = x; }
+  set(r, c, x) { while (this.rows.length < r) this.rows.push([]); this.rows[r - 1][c - 1] = parse(x); }
   getLastRow() { return this.rows.length; }
-  appendRow(v) { this.rows.push([...v]); }
+  appendRow(v) { this.rows.push(v.map(parse)); }
   getDataRange() { const nc = Math.max(1, ...this.rows.map((r) => r.length)); return new Range(this, 1, 1, Math.max(1, this.rows.length), nc); }
   getRange(a, b, c, d) { if (typeof a === 'string') return new Range(this, 1, 1); return new Range(this, a, b, c || 1, d || 1); }
   setFrozenRows() {}

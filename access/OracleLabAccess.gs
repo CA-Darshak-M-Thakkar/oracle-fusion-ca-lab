@@ -203,7 +203,7 @@ function recentLogins_(ss, limit) {
   var vals = sh.getRange(last - n + 1, 1, n, 6).getValues();
   var out = [];
   for (var i = vals.length - 1; i >= 0; i--) {
-    out.push({ time: text_(vals[i][0]), gmail: vals[i][1], name: vals[i][2], batch: vals[i][3], result: vals[i][4], reason: vals[i][5] });
+    out.push({ time: ts_(vals[i][0]), gmail: vals[i][1], name: vals[i][2], batch: vals[i][3], result: vals[i][4], reason: vals[i][5] });
   }
   return out;
 }
@@ -217,7 +217,7 @@ function badTriesLastHour_(ss, email) {
   var cutoff = Utilities.formatDate(new Date(Date.now() - 3600 * 1000), TZ, 'yyyy-MM-dd HH:mm:ss');
   var count = 0;
   for (var i = 0; i < vals.length; i++) {
-    if (String(vals[i][1]) === email && String(vals[i][4]) === 'Blocked' && /code/i.test(String(vals[i][5])) && text_(vals[i][0]) >= cutoff) count++;
+    if (String(vals[i][1]) === email && String(vals[i][4]) === 'Blocked' && /code/i.test(String(vals[i][5])) && ts_(vals[i][0]) >= cutoff) count++;
   }
   return count;
 }
@@ -267,7 +267,7 @@ function findCode_(ss, codeText) {
   return null;
 }
 function studentObj_(r) {
-  return { gmail: r[S.gmail], name: r[S.name], icai: r[S.icai], city: r[S.city], batch: String(r[S.batch]), accessDate: text_(r[S.date]), code: r[S.code], status: r[S.status], joinedAt: text_(r[S.joined]) };
+  return { gmail: r[S.gmail], name: r[S.name], icai: r[S.icai], city: r[S.city], batch: String(r[S.batch]), accessDate: text_(r[S.date]), code: r[S.code], status: r[S.status], joinedAt: ts_(r[S.joined]) };
 }
 function codeObj_(r) {
   return { batchNo: String(r[C.batch]), accessDate: text_(r[C.date]), code: String(r[C.code]), endDate: text_(r[C.end]), maxUses: Number(r[C.max]) || 0, used: Number(r[C.used]) || 0, active: String(r[C.active]) };
@@ -284,6 +284,11 @@ function ymd_(v) {
 }
 function text_(v) {
   if (v instanceof Date) return Utilities.formatDate(v, TZ, 'dd-MM-yyyy');
+  return String(v === null || v === undefined ? '' : v);
+}
+/** Date-time cells: Sheets may turn our 'yyyy-MM-dd HH:mm:ss' text into a real date; read both back the same way. */
+function ts_(v) {
+  if (v instanceof Date) return Utilities.formatDate(v, TZ, 'yyyy-MM-dd HH:mm:ss');
   return String(v === null || v === undefined ? '' : v);
 }
 function nowIst_() { return Utilities.formatDate(new Date(), TZ, 'yyyy-MM-dd HH:mm:ss'); }

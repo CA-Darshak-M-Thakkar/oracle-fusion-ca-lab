@@ -139,7 +139,7 @@ check('wrong code -> "Code not valid - ask your tutor"', r.status === 403 && r.b
 r = await asha.req('/api/join', { json: { name: 'Asha Patel', icai: 'wro0123456', city: 'Rajkot', code: code1.toLowerCase() } });
 check('valid code -> approved', r.body.status === 'approved', JSON.stringify(r.body));
 const srow = tab('Students').find((x) => x[0] === 'asha.student@gmail.com');
-check('Students row: Gmail, Name, ICAI, City, Batch, Access Date, Code, Status', srow && srow[1] === 'Asha Patel' && srow[2] === 'WRO0123456' && srow[3] === 'Rajkot' && srow[4] === '32' && srow[6] === code1 && srow[7] === 'Approved' && /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(srow[8]), JSON.stringify(srow));
+check('Students row: Gmail, Name, ICAI, City, Batch, Access Date, Code, Status', srow && srow[1] === 'Asha Patel' && srow[2] === 'WRO0123456' && srow[3] === 'Rajkot' && srow[4] === '32' && srow[6] === code1 && srow[7] === 'Approved' && srow[8] instanceof Date, JSON.stringify(srow));
 check('Used incremented to 1', tab('Codes').find((x) => x[2] === code1)[5] === 1);
 r = await asha.req('/lab/'); check('approved student opens lab', r.status === 200);
 r = await asha.req(`/lab/assets/${css}`); check('approved student gets assets', r.status === 200);
@@ -203,7 +203,9 @@ r = await admin.req('/api/admin/codes'); check('codes list with states', r.body.
 r = await admin.req('/api/admin/logins'); check('recent logins list (newest first)', r.body.logins.length > 10 && r.body.logins[0].gmail === 'hacker@gmail.com');
 const log = tab('Login Log');
 check('Login Log has Allowed + Blocked rows with reasons', log.some((x) => x[4] === 'Allowed' && /Joined with code/.test(x[5])) && log.some((x) => x[4] === 'Blocked' && /Code not found/.test(x[5])) && log.some((x) => x[4] === 'Blocked' && /Batch access ended/.test(x[5])) && log.some((x) => /Admin/.test(x[5])));
-check('Login Log time is IST text', /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(log[1][0]));
+check('Login Log times read back as IST date-time even when Sheets stores a Date', log[1][0] instanceof Date && /^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(r.body.logins[0].time), r.body.logins[0].time);
+for (const row of log) if (row[1] === 'hacker@gmail.com') row[0] = new Date(row[0].getTime() - 2 * 3600000); // wrong tries now 2 h old
+r = await h.req('/api/join', { json: { name: 'H', icai: 'W', city: 'R', code: code3b } }); check('wrong tries older than 1 hour no longer lock', r.body.status === 'approved', JSON.stringify(r.body));
 r = await anon.req('/mock-script', { json: { action: 'listCodes', secret: 'wrong' } }); check('Apps Script rejects wrong secret', r.body.ok === false && r.body.error === 'unauthorised');
 
 console.log(results.join('\n'));
