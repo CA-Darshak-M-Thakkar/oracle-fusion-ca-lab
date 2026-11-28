@@ -7,12 +7,15 @@
  *
  * Setup (one time, about 2 minutes):
  *   1. Open the sheet > Extensions > Apps Script. Delete the sample code, paste this file, Save.
- *   2. Project Settings (gear) > Script Properties > Add: LAB_SECRET = <the secret you were given>.
+ *   2. Only if EMBEDDED_SECRET below is empty: Project Settings (gear) > Script Properties > Add LAB_SECRET = <secret>.
  *   3. Deploy > New deployment > type Web app. Execute as: Me. Who has access: Anyone. Deploy.
  *      Click Authorize access and allow. Copy the Web app URL (ends with /exec).
  *   4. Put that URL into Vercel env APPS_SCRIPT_URL (or send it to Grok Bot).
  */
 
+// Leave empty in GitHub. The private copy given to the tutor has the secret filled in here,
+// so step 2 below (Script Properties) is optional for that copy.
+var EMBEDDED_SECRET = '';
 var TZ = 'Asia/Kolkata';
 var TABS = {
   students: { name: 'Students', headers: ['Gmail', 'Name', 'ICAI Reg No', 'City', 'Batch No', 'Access Date', 'Code', 'Status', 'Joined At'] },
@@ -36,7 +39,7 @@ function doPost(e) {
   } catch (err) {
     return json_({ ok: false, error: 'bad json' });
   }
-  var secret = PropertiesService.getScriptProperties().getProperty('LAB_SECRET');
+  var secret = PropertiesService.getScriptProperties().getProperty('LAB_SECRET') || EMBEDDED_SECRET;
   if (!secret || body.secret !== secret) return json_({ ok: false, error: 'unauthorised' });
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
