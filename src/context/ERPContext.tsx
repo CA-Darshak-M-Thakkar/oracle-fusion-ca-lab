@@ -25,6 +25,7 @@ import {
   BankStatementLine,
 } from '../types/erp';
 import { GOOGLE_SHEET_WEBHOOK_URL } from '../config/attendance';
+import { serverGateEnabled, serverSignOut } from '../config/serverGate';
 import { classRoleFor, isTeacherEmail } from '../config/auth';
 import {
   ACCOUNT_NAMES,
@@ -438,6 +439,11 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const signOut = () => {
+    if (serverGateEnabled) {
+      setIsSignedIn(false);
+      serverSignOut();
+      return;
+    }
     setIsSignedIn(false);
     setTeachingModeState(false);
     setCurrentRoute('home');

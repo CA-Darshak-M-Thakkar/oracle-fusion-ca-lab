@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Admin - Oracle Fusion Lab</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main class="wide">
+  <div class="top">
+    <div><p class="kicker">ABC Ltd · Oracle Fusion lab</p><h1>Tutor admin</h1><p class="muted" id="who"></p></div>
+    <div>
+      <a class="btn ghost" href="/lab/">Open the lab</a>
+      <a class="btn ghost" id="sheetlink" target="_blank" rel="noopener" href="#">Open the Sheet</a>
+      <button class="ghost" id="out" type="button">Sign out</button>
+    </div>
+  </div>
+  <div id="msg" class="msg hidden" role="alert"></div>
+
+  <section id="projector" class="card hidden" style="border-color:#22d3ee">
+    <p class="kicker" style="text-align:center">Batch <span id="pbatch"></span> · type this code after Google sign-in · valid till <span id="pend"></span></p>
+    <div class="bigcode" id="pcode"></div>
+    <div class="count"><span id="pcount">0</span> joined <span class="muted" id="pmax"></span></div>
+    <p class="muted" style="text-align:center" id="pnames"></p>
+    <p style="text-align:center"><button class="ghost small" id="hide" type="button">Hide code</button></p>
+  </section>
+
+  <section class="card">
+    <h2>Create batch code</h2>
+    <form id="create" class="grid">
+      <div><label for="batch">Batch no.</label><input id="batch" required placeholder="32" maxlength="6"></div>
+      <div><label for="end">End date</label><input id="end" type="date" required></div>
+      <div><label for="max">Max students</label><input id="max" type="number" min="1" max="1000" value="60"></div>
+      <div><button id="createbtn" type="submit" style="margin-top:44px">Create code</button></div>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Batch codes</h2>
+    <table><thead><tr><th>Code</th><th>Batch</th><th>Created</th><th>Ends</th><th>Used</th><th>State</th><th></th></tr></thead><tbody id="codes"><tr><td colspan="7" class="muted">Loading…</td></tr></tbody></table>
+  </section>
+
+  <section class="card">
+    <h2>Recent sign-ins</h2>
+    <table><thead><tr><th>Time IST</th><th>Gmail</th><th>Name</th><th>Batch</th><th>Result</th><th>Reason</th></tr></thead><tbody id="logins"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody></table>
+  </section>
+</main>
+<script src="/admin.js"></script>
+</body>
+</html>

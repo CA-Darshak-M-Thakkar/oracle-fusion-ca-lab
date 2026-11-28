@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ERPProvider, useERP } from './context/ERPContext';
 import { LoginScreen } from './components/LoginScreen';
+import { fetchServerMe, serverGateEnabled } from './config/serverGate';
 import { TopHeader } from './components/TopHeader';
 import { NavigatorDrawer } from './components/NavigatorDrawer';
 import { HomeSpringboard } from './components/HomeSpringboard';
@@ -81,6 +82,29 @@ const MainRouter: React.FC<{
     window.addEventListener('fusion-close-overlays', close);
     return () => window.removeEventListener('fusion-close-overlays', close);
   }, []);
+
+  const { signIn, currentUser } = useERP();
+  const [gateReady, setGateReady] = useState(!serverGateEnabled);
+  useEffect(() => {
+    if (!serverGateEnabled) return;
+    fetchServerMe()
+      .then((me) => {
+        if (!me.signedIn || !me.email) {
+          window.location.href = '/';
+          return;
+        }
+        if (!isSignedIn || (currentUser.email || "").toLowerCase() !== me.email.toLowerCase()) {
+          signIn({ name: me.name || me.email, email: me.email });
+        }
+        setGateReady(true);
+      })
+      .catch(() => setGateReady(true));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (serverGateEnabled && (!gateReady || !isSignedIn)) {
+    return <div className="login-screen flex min-h-screen items-center justify-center text-2xl">Opening the lab…</div>;
+  }
 
   if (!isSignedIn) {
     return (

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>ABC Ltd - Oracle Fusion Lab - Sign in</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+  <p class="kicker">AICITSS classroom</p>
+  <h1>Oracle Fusion practice lab</h1>
+
+  <section id="signin" class="card">
+    <p>Sign in with the Google account you use in class.</p>
+    <div id="gbtn" style="min-height:44px;margin-top:14px"></div>
+    <p id="gload" class="muted">Loading Google sign-in…</p>
+    <p class="muted">We record your Gmail, name and each sign-in on the tutor's access sheet. Never type a password here.</p>
+  </section>
+
+  <section id="admin" class="card hidden">
+    <h2>Welcome, <span id="aname"></span></h2>
+    <p>You are signed in as the tutor.</p>
+    <a class="btn" href="/admin.html">Open admin page</a>
+    <a class="btn ghost" href="/lab/">Open the lab</a>
+  </section>
+
+  <section id="form" class="card hidden">
+    <h2>One-time registration</h2>
+    <p class="muted">Fill this once. Your tutor shows the batch code on the screen.</p>
+    <form id="joinform" autocomplete="on">
+      <label for="gmail">Gmail</label>
+      <input id="gmail" readonly>
+      <label for="fname">Full name</label>
+      <input id="fname" name="name" required maxlength="80" autocomplete="name">
+      <label for="icai">ICAI registration no.</label>
+      <input id="icai" name="icai" required maxlength="20" placeholder="WRO0123456" style="text-transform:uppercase">
+      <label for="city">City</label>
+      <input id="city" name="city" required maxlength="40" placeholder="Rajkot">
+      <label for="code">Batch code</label>
+      <input id="code" name="code" required maxlength="24" placeholder="B32-28112026-K7QX" style="text-transform:uppercase;font-family:monospace" autocomplete="off">
+      <button id="joinbtn" type="submit">Join the lab</button>
+    </form>
+  </section>
+
+  <div id="msg" class="msg hidden" role="alert"></div>
+  <p style="margin-top:22px"><button id="out" class="ghost small hidden" type="button">Sign out</button></p>
+  <p class="muted"><a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
+</main>
+<script src="/gate.js"></script>
+</body>
+</html>

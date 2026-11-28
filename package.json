@@ -7,9 +7,12 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "build:vercel": "tsc --noEmit && VITE_SERVER_GATE=1 vite build --base /lab/ --outDir private/lab --emptyOutDir",
+    "test:gate": "node access/test/run-gate-tests.mjs"
   },
   "dependencies": {
+    "jose": "^5.10.0",
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

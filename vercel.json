@@ -1,0 +1,53 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": "gate",
+  "functions": {
+    "api/lab.js": {
+      "includeFiles": "private/lab/**",
+      "maxDuration": 15
+    }
+  },
+  "redirects": [
+    {
+      "source": "/lab",
+      "destination": "/lab/",
+      "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/lab/",
+      "destination": "/api/lab?p="
+    },
+    {
+      "source": "/lab/:path*",
+      "destination": "/api/lab?p=:path*"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Cross-Origin-Opener-Policy",
+          "value": "same-origin-allow-popups"
+        }
+      ]
+    }
+  ]
+}

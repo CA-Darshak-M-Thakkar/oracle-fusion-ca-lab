@@ -4,3 +4,7 @@ dist
 test-results
 playwright-report
 .playwright
+
+# Vercel private lab build (served only through api/lab.js)
+private/
+.vercel
