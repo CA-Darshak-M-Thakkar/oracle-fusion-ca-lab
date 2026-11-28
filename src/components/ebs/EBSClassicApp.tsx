@@ -113,6 +113,12 @@ export const EBSClassicApp: React.FC<EBSClassicAppProps> = ({ onSwitchToFusion }
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-[#CDE2EF]">User: {currentUser.name}</span>
+          <a
+            href="#ebs-replica"
+            className="rounded-[2px] border border-white/40 px-2.5 py-1 text-[11.5px] font-medium text-white hover:bg-white/10"
+          >
+            Screen gallery: EBS next to Fusion
+          </a>
           <button
             type="button"
             data-coach="switch-to-fusion"
