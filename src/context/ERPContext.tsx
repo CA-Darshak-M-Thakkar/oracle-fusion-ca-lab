@@ -208,6 +208,13 @@ function cleanStoredUser(raw: UserProfile | undefined): UserProfile {
   };
 }
 
+/** Simple, predictable document numbers for teaching (REQ-101, PO-201, GRN-301, BILL-401, PAY-501): the first free number from the start value. Same numbers as p2p-source/data.yaml. */
+function simpleId(prefix: string, first: number, taken: string[]): string {
+  let n = first;
+  while (taken.includes(`${prefix}-${n}`)) n++;
+  return `${prefix}-${n}`;
+}
+
 export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const loadSaved = () => {
     try {
@@ -482,7 +489,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const clearCart = () => setCart([]);
 
   const createRequisitionFromCart = (description: string, justification: string, submitImmediately: boolean) => {
-    const id = `REQ-${Math.floor(100 + Math.random() * 900)}`;
+    const id = simpleId('REQ', 101, requisitions.map((r) => r.id));
     const lines = cart.map((c, idx) => ({ ...c.line, lineNumber: idx + 1 }));
     const totalAmount = lines.reduce((sum, l) => sum + l.amount, 0);
     const status: Requisition['status'] = submitImmediately ? 'Pending approval' : 'Incomplete';
@@ -548,7 +555,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast('warning', 'Supplier not approved', `${chosen.name} is not an approved supplier. Pick Sharma Traders or Patel Papers.`);
       return null;
     }
-    const nextNum = `PO-${Math.floor(20 + Math.random() * 800)}`;
+    const nextNum = simpleId('PO', 201, purchaseOrders.map((o) => o.id));
     const po: PurchaseOrder = {
       id: nextNum,
       procurementBU: COMPANY.bu,
@@ -639,7 +646,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast('warning', 'Check the quantity', `You can receive up to ${remaining} ${line.uom}.`);
       return null;
     }
-    const nextId = `GRN-${Math.floor(200 + Math.random() * 700)}`;
+    const nextId = simpleId('GRN', 301, receipts.map((r) => r.id));
     const value = Math.round(qty * line.price);
     const receipt: GoodsReceipt = {
       id: nextId,
@@ -725,7 +732,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         status = 'Validated';
       }
     }
-    const invId = `BILL-${Math.floor(300 + Math.random() * 600)}`;
+    const invId = simpleId('BILL', 401, apInvoices.map((i) => i.id));
     const due = data.dueDate || dueDateFrom(todayDate(), sup.paymentTerms);
     const inv: APInvoice = {
       id: invId,
@@ -852,7 +859,7 @@ export const ERPProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return null;
     }
     const totalPaid = target.reduce((s, i) => s + i.unpaidAmount, 0);
-    const payId = `PAY-${Math.floor(3000 + Math.random() * 5000)}`;
+    const payId = simpleId('PAY', 501, apPayments.map((x) => x.id));
     const sup = suppliers.find((s) => s.name === data.supplier) ?? suppliers[0];
     const payment: APPayment = {
       id: payId,

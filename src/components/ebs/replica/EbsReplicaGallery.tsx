@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { EbsWindow, SCREENS, THEME, DATASETS } from './EbsWindow';
-import { FusionView } from './FusionView';
+import { EbsWindow, SCREENS, THEME, DATASETS, fill } from './EbsWindow';
+import { FusionView, ClickPath } from './FusionView';
 import hashInfo from '../../../data/ebs/source-hash.json';
 
 const LAB_ROUTE: Record<string, string> = { requisition_form: 'purchase_requisitions', find_requisitions: 'manage_requisitions', po_form: 'purchase_orders', receipts: 'my_receipts', invoice_workbench: 'payables_invoices', payments: 'payables_payments' };
 
 /** Gallery: each EBS R12 screen (CSS replica) next to its Fusion Cloud counterpart. Routes: #ebs-replica, #ebs-replica/<screen-id> (1:1 single window). */
 export const EbsReplicaGallery: React.FC = () => {
-  const [ds, setDs] = useState<string>('manual');
+  const ds = 'abc';
   const [hash, setHash] = useState(window.location.hash);
   useEffect(() => { const f = () => setHash(window.location.hash); window.addEventListener('hashchange', f); return () => window.removeEventListener('hashchange', f); }, []);
   const parts = hash.replace(/^#/, '').split('/');
   const only = parts[1]?.split('?')[0];
   const q = new URLSearchParams(hash.split('?')[1] || '');
-  const dsq = q.get('data') || ds;
+  const dsq = ds;
   if (only) {
     const s = SCREENS.find((x) => x.id === only);
     if (!s) return <div>Unknown screen</div>;
@@ -27,10 +27,7 @@ export const EbsReplicaGallery: React.FC = () => {
         Left: the older E-Business Suite R12 screen, rebuilt from the P2P manual (<b>{THEME.labels.ebs}</b>). Right: the matching screen in <b>{THEME.labels.fusion}</b>, which is what the ICAI syllabus teaches. The classes use Fusion; the EBS screens help students who meet the old system at clients.
       </p>
       <div style={{ display: 'flex', gap: 8, margin: '10px 0 18px', alignItems: 'center', flexWrap: 'wrap' }}>
-        <span>Numbers shown:</span>
-        {Object.keys(DATASETS).map((k) => (
-          <button key={k} data-testid={`ds-${k}`} onClick={() => setDs(k)} style={{ padding: '6px 12px', borderRadius: 16, border: '1px solid #312d2a', background: ds === k ? '#312d2a' : '#fff', color: ds === k ? '#fff' : '#312d2a', cursor: 'pointer' }}>{DATASETS[k].label}</button>
-        ))}
+        <span style={{ fontSize: 14 }}>One set of dummy data everywhere: <b>ABC Ltd</b>, Sharma Traders, 10 Office Chairs × ₹5,000 = ₹50,000 + 18% GST = ₹59,000.</span>
         <span style={{ marginLeft: 'auto', fontSize: 12, color: '#6b6560' }}>generated from p2p-source ({(hashInfo as any).sourceHash}, {(hashInfo as any).screens} screens)</span>
       </div>
       {SCREENS.map((s) => (
@@ -43,10 +40,12 @@ export const EbsReplicaGallery: React.FC = () => {
             <div>
               <div style={{ background: '#2d84c5', color: '#fff', padding: '4px 10px', fontWeight: 600, fontSize: 14, borderRadius: '4px 4px 0 0' }}>{THEME.labels.ebs}</div>
               <EbsWindow screen={s} dataset={ds} />
+              <ClickPath steps={[s.responsibility, ...(s.nav || '').split('>')].map((x: any) => String(x || '').trim()).filter(Boolean)} color="#2d84c5" label="EBS click path:" />
             </div>
             <div>
               <div style={{ background: '#c74634', color: '#fff', padding: '4px 10px', fontWeight: 600, fontSize: 14, borderRadius: '4px 4px 0 0' }}>{THEME.labels.fusion}</div>
-              <FusionView spec={s.fusion} dataset="abc" />
+              <FusionView spec={s.fusion} dataset={ds} />
+              <ClickPath steps={(s.fusion.path || []).map((x: string) => fill(x, DATASETS[ds]))} color="#c74634" label="Fusion click path:" press={s.fusion.press} />
             </div>
           </div>
         </section>

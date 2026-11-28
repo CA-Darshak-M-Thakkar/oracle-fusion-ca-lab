@@ -174,7 +174,7 @@ function renderEl(el: El, i: number, ds: Record<string, string>, W: number): Rea
 }
 
 export const EbsWindow: React.FC<{ screen: EbsScreen; dataset: string; testId?: boolean }> = ({ screen, dataset, testId }) => {
-  const ds = DATASETS[dataset] ?? DATASETS.manual;
+  const ds = DATASETS[dataset] ?? DATASETS.abc;
   const W = screen.w;
   const chrome = screen.chrome !== false;
   const ctl = screen.ctl ?? 'mmc';
